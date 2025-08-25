@@ -1,26 +1,30 @@
 package com.Backend.MediXBackend.Model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-
+import java.util.Set;
 
 @Entity
 public class Doctor {
-
     @Id
     private Long doctorId;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    @JsonManagedReference
+    @JsonManagedReference("doctor-user")  // Changed to include a reference name
     private User user;
 
-    private Integer qualificationId;
-    private Integer specializationId;
     private Integer yearsOfExperience;
     private String availableDays;
     private String availableTimes;
     private String licenseNumber;
 
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("doctor-qualifications")  // Added
+    private Set<DoctorQualification> qualifications;
+
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("doctor-specializations")  // Added
+    private Set<DoctorSpecialization> specializations;;
 
     // Getters and setters
     public Long getDoctorId() {
@@ -31,20 +35,12 @@ public class Doctor {
         this.doctorId = doctorId;
     }
 
-    public Integer getQualificationId() {
-        return qualificationId;
+    public User getUser() {
+        return user;
     }
 
-    public void setQualificationId(Integer qualificationId) {
-        this.qualificationId = qualificationId;
-    }
-
-    public Integer getSpecializationId() {
-        return specializationId;
-    }
-
-    public void setSpecializationId(Integer specializationId) {
-        this.specializationId = specializationId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Integer getYearsOfExperience() {
@@ -79,12 +75,20 @@ public class Doctor {
         this.licenseNumber = licenseNumber;
     }
 
-
-    public User getUser() {
-        return user;
+    public Set<DoctorQualification> getQualifications() {
+        return qualifications;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setQualifications(Set<DoctorQualification> qualifications) {
+        this.qualifications = qualifications;
     }
+
+    public Set<DoctorSpecialization> getSpecializations() {
+        return specializations;
+    }
+
+    public void setSpecializations(Set<DoctorSpecialization> specializations) {
+        this.specializations = specializations;
+    }
+
 }

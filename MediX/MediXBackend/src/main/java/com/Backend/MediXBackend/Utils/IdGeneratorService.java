@@ -1,6 +1,6 @@
 package com.Backend.MediXBackend.Utils;
 
-import com.Backend.MediXBackend.UserRepository.*;
+import com.Backend.MediXBackend.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -4,13 +4,11 @@ import com.Backend.MediXBackend.Model.Appointment;
 import com.Backend.MediXBackend.Model.AppointmentWithDetails;
 import com.Backend.MediXBackend.Service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -79,6 +77,12 @@ public class AppointmentController {
     @GetMapping("/with-details")
     public ResponseEntity<List<AppointmentWithDetails>> getAppointmentsWithDetails() {
         List<AppointmentWithDetails> appointments = appointmentService.getAppointmentsWithDetails();
+        return ResponseEntity.ok(appointments);
+    }
+
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<List<Appointment>> getAppointmentsByPatientId(@PathVariable Long patientId) {
+        List<Appointment> appointments = appointmentService.getAppointmentsByPatientId(patientId);
         return ResponseEntity.ok(appointments);
     }
 }

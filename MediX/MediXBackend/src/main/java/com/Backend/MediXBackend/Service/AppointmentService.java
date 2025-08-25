@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,6 +59,10 @@ public class AppointmentService {
 
     public Optional<Appointment> getAppointmentById(Long id) {
         return appointmentRepo.findById(id);
+    }
+    
+    public List<Appointment> getAppointmentsByPatientId(Long patientId) {
+        return appointmentRepo.findByPatientId(patientId);
     }
 
     public List<AppointmentWithDetails> getAppointmentsWithDetails() {
