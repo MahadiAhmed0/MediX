@@ -4,6 +4,7 @@ import SubHeader from "@/components/pharmacist/subHeader";
 import Footer from "@/components/footer";
 
 import React, { useState, useEffect } from 'react';
+
 import medicinesData from '@/data/medicines.json';
 
 type Medicine = {
@@ -47,25 +48,47 @@ export default function MedicinesPage() {
     setTimeout(() => setToast(null), 3000);  // Hide toast after 3 seconds
   };
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.company || !form.name || !form.genericName || !form.quantity || !form.totalCostPrice || !form.sellingPricePerUnit || !form.expiryDate) return;
-    setMedicines([
-      ...medicines,
-      {
-        id: Date.now(),
-        company: form.company,
-        name: form.name,
-        genericName: form.genericName,
-        quantity: Number(form.quantity),
-        totalCostPrice: Number(form.totalCostPrice),
-        sellingPricePerUnit: Number(form.sellingPricePerUnit),
-        expiryDate: form.expiryDate
+
+    // Prepare request body as per backend API
+    const requestBody = {
+      company: form.company,
+      medicineName: form.name,
+      genericName: form.genericName,
+      quantity: Number(form.quantity),
+      unitCost: Number(form.totalCostPrice),
+      unitPrice: Number(form.sellingPricePerUnit),
+      expiryDate: form.expiryDate
+    };
+
+    try {
+      const response = await fetch('http://localhost:8080/api/medicines', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        showToast(errorData.message || 'Failed to add medicine.', 'error');
+        return;
       }
-    ]);
-    setForm({ company: '', name: '', genericName: '', quantity: '', totalCostPrice: '', sellingPricePerUnit: '', expiryDate: '' });
-    setShowAddForm(false);
-    showToast('Medicine added successfully!', 'success');
+
+      // Optionally, get the created medicine from the response
+      // const createdMedicine = await response.json();
+
+      // For now, just show success and optionally refresh list
+      showToast('Medicine added successfully!', 'success');
+      setForm({ company: '', name: '', genericName: '', quantity: '', totalCostPrice: '', sellingPricePerUnit: '', expiryDate: '' });
+      setShowAddForm(false);
+      // Optionally, refresh medicines list from backend here
+    } catch (error) {
+      showToast('Network error. Please try again.', 'error');
+    }
   };
 
   const handleEdit = (id: number) => {
