@@ -11,49 +11,56 @@ type Item = {
 
 interface InvoiceProps {
   date?: string;
+  setDate?: (date: string) => void;
   items?: Array<{
     qty: string;
     name: string;
     price: string;
     discount: string;
   }>;
+  setItems?: (items: Item[]) => void;
   customerName?: string;
+  setCustomerName?: (name: string) => void;
   phoneNumber?: string;
+  setPhoneNumber?: (phone: string) => void;
 }
 
-export default function Invoice({ date: propDate, items: propItems, customerName: propCustomerName, phoneNumber: propPhoneNumber }: InvoiceProps) {
+export default function Invoice({ date: propDate, setDate, items: propItems, setItems, customerName: propCustomerName, setCustomerName, phoneNumber: propPhoneNumber, setPhoneNumber }: InvoiceProps) {
   // refs for table inputs: [row][col]
   const inputRefs = useRef<Array<Array<HTMLInputElement | null>>>([]);
 
-  const [customerName, setCustomerName] = useState(propCustomerName || "");
-  const [phoneNumber, setPhoneNumber] = useState(propPhoneNumber || "");
-  // Update state if customerName/phoneNumber props change
-  useEffect(() => {
-    if (propCustomerName !== undefined) setCustomerName(propCustomerName);
-  }, [propCustomerName]);
-
-  useEffect(() => {
-    if (propPhoneNumber !== undefined) setPhoneNumber(propPhoneNumber);
-  }, [propPhoneNumber]);
-  const [companyName, setCompanyName] = useState("");
-  const [address, setAddress] = useState("");
-  
-  // Set the default date to the current date
-  const [date, setDate] = useState<string>(propDate || new Date().toISOString().split("T")[0]);
-  const [items, setItems] = useState<Item[]>(
+  // If setters are provided, use props as source of truth, else fallback to local state (for backward compatibility)
+  const [localCustomerName, localSetCustomerName] = useState(propCustomerName || "");
+  const [localPhoneNumber, localSetPhoneNumber] = useState(propPhoneNumber || "");
+  const [localDate, localSetDate] = useState<string>(propDate || new Date().toISOString().split("T")[0]);
+  const [localItems, localSetItems] = useState<Item[]>(
     propItems && propItems.length > 0
       ? propItems
       : [{ qty: "1", name: "", price: "0", discount: "0" }]
   );
 
-  // Update state if props change
+  // Sync local state with props if they change
   useEffect(() => {
-    if (propDate) setDate(propDate);
+    if (propCustomerName !== undefined) localSetCustomerName(propCustomerName);
+  }, [propCustomerName]);
+  useEffect(() => {
+    if (propPhoneNumber !== undefined) localSetPhoneNumber(propPhoneNumber);
+  }, [propPhoneNumber]);
+  useEffect(() => {
+    if (propDate) localSetDate(propDate);
   }, [propDate]);
-
   useEffect(() => {
-    if (propItems && propItems.length > 0) setItems(propItems);
+    if (propItems && propItems.length > 0) localSetItems(propItems);
   }, [propItems]);
+  const [companyName, setCompanyName] = useState("");
+  const [address, setAddress] = useState("");
+  
+  // Set the default date to the current date
+  // Use prop setters if provided, else local state
+  const date = propDate !== undefined ? propDate : localDate;
+  const items = propItems !== undefined ? propItems : localItems;
+  const customerName = propCustomerName !== undefined ? propCustomerName : localCustomerName;
+  const phoneNumber = propPhoneNumber !== undefined ? propPhoneNumber : localPhoneNumber;
 
   // Ensure refs array matches items
   useEffect(() => {
@@ -68,15 +75,20 @@ export default function Invoice({ date: propDate, items: propItems, customerName
       ...updated[index],
       [field]: (field === "price" || field === "qty" || field === "discount") ? value.replace(/^0+(?!$)/, "") : value,
     };
-    setItems(updated);
+    if (setItems) setItems(updated);
+    else localSetItems(updated);
   };
 
   const addItem = () => {
-    setItems([...items, { qty: "1", name: "", price: "0", discount: "0" }]);
+    const newItems = [...items, { qty: "1", name: "", price: "0", discount: "0" }];
+    if (setItems) setItems(newItems);
+    else localSetItems(newItems);
   };
 
   const handleRemoveItem = (index: number) => {
-    setItems((prev) => prev.filter((_, i) => i !== index));
+    const newItems = items.filter((_, i) => i !== index);
+    if (setItems) setItems(newItems);
+    else localSetItems(newItems);
   };
 
   const subtotal = items.reduce((sum, item) => {
@@ -124,7 +136,7 @@ export default function Invoice({ date: propDate, items: propItems, customerName
           <label className="block mt-2 font-semibold">Customer Name</label>
           <input
             value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
+            onChange={(e) => (setCustomerName ? setCustomerName(e.target.value) : localSetCustomerName(e.target.value))}
             className="w-full border px-2 py-1 rounded"
           />
         </div>
@@ -133,7 +145,7 @@ export default function Invoice({ date: propDate, items: propItems, customerName
           <label className="block mt-9 font-semibold">Phone Number</label>
           <input
             value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
+            onChange={(e) => (setPhoneNumber ? setPhoneNumber(e.target.value) : localSetPhoneNumber(e.target.value))}
             className="w-full border px-2 py-1 rounded"
           />
         </div>
@@ -143,7 +155,7 @@ export default function Invoice({ date: propDate, items: propItems, customerName
           <input
             type="date"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => (setDate ? setDate(e.target.value) : localSetDate(e.target.value))}
             className="w-full border px-2 py-1 rounded"
           />
         </div>

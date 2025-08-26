@@ -12,7 +12,12 @@ export default function SellPage() {
   const [prescriptionId, setPrescriptionId] = useState('');
   const [loading, setLoading] = useState(false);
   const [invoiceDate, setInvoiceDate] = useState<string>("");
-  const [invoiceItems, setInvoiceItems] = useState<any[]>([]);
+  const [invoiceItems, setInvoiceItems] = useState<any[]>([{
+    qty: "1",
+    name: "",
+    price: "0",
+    discount: "0"
+  }]);
   const [customerName, setCustomerName] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const router = useRouter();
@@ -28,10 +33,10 @@ export default function SellPage() {
       const data = await response.json();
       if (!data.success) {
         alert("Prescription not found.");
-        setInvoiceDate("");
-        setInvoiceItems([]);
-        setCustomerName("");
-        setPhoneNumber("");
+  setInvoiceDate("");
+  setInvoiceItems([{ qty: "1", name: "", price: "0", discount: "0" }]);
+  setCustomerName("");
+  setPhoneNumber("");
         return;
       }
       setInvoiceDate(data.data.prescriptionDate || "");
@@ -82,10 +87,10 @@ export default function SellPage() {
     } catch (error) {
       console.error("Error fetching prescription:", error);
       alert("Error fetching prescription data.");
-      setInvoiceDate("");
-      setInvoiceItems([]);
-      setCustomerName("");
-      setPhoneNumber("");
+  setInvoiceDate("");
+  setInvoiceItems([{ qty: "1", name: "", price: "0", discount: "0" }]);
+  setCustomerName("");
+  setPhoneNumber("");
     } finally {
       setLoading(false);
     }
@@ -199,7 +204,16 @@ export default function SellPage() {
               Receipt Preview
             </h2>
             <div className="bg-white rounded-xl shadow p-4 sm:p-8 border border-green-100">
-              <Invoice date={invoiceDate} items={invoiceItems} customerName={customerName} phoneNumber={phoneNumber} />
+              <Invoice
+                date={invoiceDate}
+                setDate={setInvoiceDate}
+                items={invoiceItems}
+                setItems={setInvoiceItems}
+                customerName={customerName}
+                setCustomerName={setCustomerName}
+                phoneNumber={phoneNumber}
+                setPhoneNumber={setPhoneNumber}
+              />
             </div>
           </section>
 
