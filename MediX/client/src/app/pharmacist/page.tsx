@@ -3,9 +3,9 @@ import Header from "@/components/pharmacist/header";
 import SubHeader from "@/components/pharmacist/subHeader";
 import Footer from "@/components/footer";
 import { useState, useEffect } from "react";
-import medicinesData from "@/data/medicines.json";
 
-// Dummy data for demonstration
+
+
 const dummySales = [
   { name: "Napa", sold: 40 },
   { name: "Seclo", sold: 25 },
@@ -13,26 +13,59 @@ const dummySales = [
   { name: "Amoxil", sold: 12 },
   { name: "Ciprocin", sold: 10 },
 ];
-const dummyExpiry = [
-  { name: "Seclo", expiry: "2025-09-10", daysLeft: 22 },
-  { name: "Ace", expiry: "2025-09-05", daysLeft: 17 },
-];
-const dummyStock = [
-  { name: "Seclo", quantity: 15 },
-  { name: "Ace", quantity: 8 },
-];
 const dummyRevenue = {
   today: 5000,
   week: 32000,
   month: 150000,
 };
 
+
 export default function PharmacistHome() {
   const [topSelling, setTopSelling] = useState(dummySales);
-  const [expiryAlert, setExpiryAlert] = useState(dummyExpiry);
-  const [stockAlert, setStockAlert] = useState(dummyStock);
+  const [expiryAlert, setExpiryAlert] = useState<{ name: string; expiry: string; daysLeft: number }[]>([]);
+  const [stockAlert, setStockAlert] = useState<{ name: string; quantity: number }[]>([]);
   const [revenue, setRevenue] = useState(dummyRevenue);
   const [selectedRevenue, setSelectedRevenue] = useState<'today' | 'week' | 'month'>('today');
+
+  useEffect(() => {
+    // Fetch medicines from backend and compute alerts
+    const fetchMedicines = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/medicines');
+        if (!response.ok) throw new Error('Failed to fetch medicines');
+        const data = await response.json();
+        // Compute expiry alert (expiring within 30 days)
+        const today = new Date();
+        const expiryList = data
+          .filter((med: any) => med.expiryDate)
+          .map((med: any) => {
+            const expiry = new Date(med.expiryDate);
+            const daysLeft = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+            return {
+              name: med.medicineName,
+              expiry: med.expiryDate,
+              daysLeft,
+            };
+          })
+          .filter((med: any) => med.daysLeft >= 0 && med.daysLeft <= 30)
+          .sort((a: any, b: any) => a.daysLeft - b.daysLeft);
+        setExpiryAlert(expiryList);
+
+        // Compute low stock alert (quantity < 30)
+        const stockList = data
+          .filter((med: any) => med.quantity < 30)
+          .map((med: any) => ({
+            name: med.medicineName,
+            quantity: med.quantity,
+          }));
+        setStockAlert(stockList);
+      } catch (error) {
+        setExpiryAlert([]);
+        setStockAlert([]);
+      }
+    };
+    fetchMedicines();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-green-50 to-green-100 text-gray-900 flex flex-col">

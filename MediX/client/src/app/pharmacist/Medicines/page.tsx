@@ -5,7 +5,7 @@ import Footer from "@/components/footer";
 
 import React, { useState, useEffect } from 'react';
 
-import medicinesData from '@/data/medicines.json';
+
 
 type Medicine = {
   id: number;
@@ -19,7 +19,7 @@ type Medicine = {
 };
 
 export default function MedicinesPage() {
-  const [medicines, setMedicines] = useState<Medicine[]>(medicinesData as Medicine[]);
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [filterLowStock, setFilterLowStock] = useState(false);
@@ -36,7 +36,29 @@ export default function MedicinesPage() {
   const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
-    setMedicines(medicinesData);
+    // Fetch medicines from backend API
+    const fetchMedicines = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/medicines');
+        if (!response.ok) throw new Error('Failed to fetch medicines');
+        const data = await response.json();
+        // Map backend fields to frontend Medicine type if needed
+        const mapped = data.map((med: any) => ({
+          id: med.id || med.medicineId || Date.now() + Math.random(),
+          company: med.company,
+          name: med.medicineName,
+          genericName: med.genericName,
+          quantity: med.quantity,
+          totalCostPrice: med.unitCost, // backend: unitCost
+          sellingPricePerUnit: med.unitPrice, // backend: unitPrice
+          expiryDate: med.expiryDate
+        }));
+        setMedicines(mapped);
+      } catch (error) {
+        setMedicines([]);
+      }
+    };
+    fetchMedicines();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +74,6 @@ export default function MedicinesPage() {
     e.preventDefault();
     if (!form.company || !form.name || !form.genericName || !form.quantity || !form.totalCostPrice || !form.sellingPricePerUnit || !form.expiryDate) return;
 
-    // Prepare request body as per backend API
     const requestBody = {
       company: form.company,
       medicineName: form.name,
@@ -78,14 +99,25 @@ export default function MedicinesPage() {
         return;
       }
 
-      // Optionally, get the created medicine from the response
-      // const createdMedicine = await response.json();
-
-      // For now, just show success and optionally refresh list
       showToast('Medicine added successfully!', 'success');
       setForm({ company: '', name: '', genericName: '', quantity: '', totalCostPrice: '', sellingPricePerUnit: '', expiryDate: '' });
       setShowAddForm(false);
-      // Optionally, refresh medicines list from backend here
+      // Refresh medicines list from backend
+      const updated = await fetch('http://localhost:8080/api/medicines');
+      if (updated.ok) {
+        const data = await updated.json();
+        const mapped = data.map((med: any) => ({
+          id: med.id || med.medicineId || Date.now() + Math.random(),
+          company: med.company,
+          name: med.medicineName,
+          genericName: med.genericName,
+          quantity: med.quantity,
+          totalCostPrice: med.unitCost,
+          sellingPricePerUnit: med.unitPrice,
+          expiryDate: med.expiryDate
+        }));
+        setMedicines(mapped);
+      }
     } catch (error) {
       showToast('Network error. Please try again.', 'error');
     }
@@ -108,34 +140,99 @@ export default function MedicinesPage() {
     }
   };
 
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMedicines(
-      medicines.map((m) =>
-        m.id === editId
-          ? {
-              ...m,
-              ...form,
-              quantity: Number(form.quantity),
-              totalCostPrice: Number(form.totalCostPrice),
-              sellingPricePerUnit: Number(form.sellingPricePerUnit),
-              expiryDate: form.expiryDate
-            }
-          : m
-      )
-    );
-    setForm({ company: '', name: '', genericName: '', quantity: '', totalCostPrice: '', sellingPricePerUnit: '', expiryDate: '' });
-    setEditId(null);
-    setShowAddForm(false);
-    showToast('Medicine updated successfully!', 'success');
+    if (editId === null) return;
+
+    // Find the medicine to get its backend ID if needed
+    const med = medicines.find((m) => m.id === editId);
+    if (!med) return;
+
+    // Prepare request body as per backend API
+    const requestBody = {
+      id: med.id, // or medicineId if backend expects
+      company: form.company,
+      medicineName: form.name,
+      genericName: form.genericName,
+      quantity: Number(form.quantity),
+      unitCost: Number(form.totalCostPrice),
+      unitPrice: Number(form.sellingPricePerUnit),
+      expiryDate: form.expiryDate
+    };
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/medicines/${med.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        showToast(errorData.message || 'Failed to update medicine.', 'error');
+        return;
+      }
+
+      showToast('Medicine updated successfully!', 'success');
+      setForm({ company: '', name: '', genericName: '', quantity: '', totalCostPrice: '', sellingPricePerUnit: '', expiryDate: '' });
+      setEditId(null);
+      setShowAddForm(false);
+      // Refresh medicines list from backend
+      const updated = await fetch('http://localhost:8080/api/medicines');
+      if (updated.ok) {
+        const data = await updated.json();
+        const mapped = data.map((med: any) => ({
+          id: med.id || med.medicineId || Date.now() + Math.random(),
+          company: med.company,
+          name: med.medicineName,
+          genericName: med.genericName,
+          quantity: med.quantity,
+          totalCostPrice: med.unitCost,
+          sellingPricePerUnit: med.unitPrice,
+          expiryDate: med.expiryDate
+        }));
+        setMedicines(mapped);
+      }
+    } catch (error) {
+      showToast('Network error. Please try again.', 'error');
+    }
   };
 
-  const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this medicine?')) {
-      setMedicines(medicines.filter((m) => m.id !== id));
-      showToast('Medicine deleted successfully!', 'success');
-    } else {
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this medicine?')) {
       showToast('Deletion canceled!', 'error');
+      return;
+    }
+    try {
+      const response = await fetch(`http://localhost:8080/api/medicines/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        showToast(errorData.message || 'Failed to delete medicine.', 'error');
+        return;
+      }
+      showToast('Medicine deleted successfully!', 'success');
+      // Refresh medicines list from backend
+      const updated = await fetch('http://localhost:8080/api/medicines');
+      if (updated.ok) {
+        const data = await updated.json();
+        const mapped = data.map((med: any) => ({
+          id: med.id || med.medicineId || Date.now() + Math.random(),
+          company: med.company,
+          name: med.medicineName,
+          genericName: med.genericName,
+          quantity: med.quantity,
+          totalCostPrice: med.unitCost,
+          sellingPricePerUnit: med.unitPrice,
+          expiryDate: med.expiryDate
+        }));
+        setMedicines(mapped);
+      }
+    } catch (error) {
+      showToast('Network error. Please try again.', 'error');
     }
   };
 
