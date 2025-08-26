@@ -91,9 +91,69 @@ export default function SellPage() {
     }
   };
 
-  const handleFinalize = () => {
-    // Add logic to store the invoice to context, database, or localStorage if needed
-    router.push('/pharmacist/Sell/Finalize');
+  // Helper to calculate subtotal, tax, total
+  const calculateTotals = (items: any[]) => {
+    const subTotal = items.reduce((sum, item) => {
+      const qty = item.qty === '' ? 0 : Number(item.qty);
+      const price = item.price === '' ? 0 : Number(item.price);
+      const discount = item.discount === '' ? 0 : Number(item.discount);
+      return sum + (qty * price - discount * qty);
+    }, 0);
+    const tax = 10; // fixed for now
+    const total = subTotal + tax;
+    return { subTotal, tax, total };
+  };
+
+  const handleFinalize = async () => {
+    // Calculate totals
+    const { subTotal, tax, total } = calculateTotals(invoiceItems);
+    // Prepare billItems
+    const billItems = invoiceItems.map((item) => ({
+      medicineName: item.name,
+      quantity: Number(item.qty),
+      unitPrice: Number(item.price),
+      discount: Number(item.discount),
+      total: Number(item.qty) * Number(item.price) - Number(item.discount) * Number(item.qty),
+    }));
+    // Prepare payload
+    const payload = {
+      customerName,
+      phoneNumber,
+      date: invoiceDate,
+      prescriptionId: prescriptionId || null,
+      subTotal,
+      tax,
+      total,
+      billItems,
+      sellType: !!prescriptionId,
+    };
+    try {
+      const res = await fetch('http://localhost:8080/api/bills', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Failed to create bill:', res.status, errorText);
+        alert('Failed to finalize and lock bill. Server responded: ' + errorText);
+        return;
+      }
+      // Store invoice data in sessionStorage before navigating
+      const invoiceData = {
+        invoiceDate,
+        invoiceItems,
+        customerName,
+        phoneNumber,
+      };
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('pharmacist_invoice', JSON.stringify(invoiceData));
+      }
+      router.push('/pharmacist/Sell/Finalize');
+    } catch (err) {
+      console.error('Error during bill POST:', err);
+      alert('Failed to finalize and lock bill. ' + (err instanceof Error ? err.message : ''));
+    }
   };
 
   return (
