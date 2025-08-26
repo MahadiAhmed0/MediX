@@ -3,9 +3,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
+type RevenueData = {
+  totalRevenue: number;
+  monthlyRevenue: { month: string; revenue: number }[];
+};
+
 export default function Home() {
+
   const [isVisible, setIsVisible] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [revenue, setRevenue] = useState<RevenueData | null>(null);
+  const [revenueLoading, setRevenueLoading] = useState(true);
+  const [revenueError, setRevenueError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsVisible(true);
@@ -14,6 +23,21 @@ export default function Home() {
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
     }, 5000);
+
+    // Fetch revenue analytics
+    fetch("http://localhost:8080/api/bills/revenue/analytics")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch revenue data");
+        return res.json();
+      })
+      .then((data) => {
+        setRevenue(data);
+        setRevenueLoading(false);
+      })
+      .catch((err) => {
+        setRevenueError(err.message || "Error fetching revenue data");
+        setRevenueLoading(false);
+      });
 
     return () => clearInterval(interval);
   }, []);
@@ -194,6 +218,46 @@ export default function Home() {
           <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
             <span className="text-2xl">🏥</span>
           </div>
+        </div>
+      </section>
+
+      {/* Revenue Overview Section */}
+      <section className="bg-white py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">Revenue Overview</h2>
+          {revenueLoading ? (
+            <div className="text-gray-500">Loading revenue data...</div>
+          ) : revenueError ? (
+            <div className="text-red-500">{revenueError}</div>
+          ) : revenue ? (
+            <div>
+              <div className="mb-6">
+                <span className="text-lg text-gray-700">Total Revenue:</span>
+                <span className="text-2xl font-bold text-green-700 ml-2">${revenue.totalRevenue?.toLocaleString() ?? 0}</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Monthly Revenue</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2 border-b text-left">Month</th>
+                        <th className="px-4 py-2 border-b text-left">Revenue</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {revenue.monthlyRevenue?.map((m) => (
+                        <tr key={m.month}>
+                          <td className="px-4 py-2 border-b">{m.month}</td>
+                          <td className="px-4 py-2 border-b">${m.revenue.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
       </section>
 

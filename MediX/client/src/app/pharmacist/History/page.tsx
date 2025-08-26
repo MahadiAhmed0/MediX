@@ -6,6 +6,20 @@ import Footer from '@/components/footer';
 
 import { useEffect, useState } from 'react';
 
+// Simple toast component
+function Toast({ message, onClose, type }: { message: string; onClose: () => void; type: 'success' | 'error' }) {
+  return (
+    <div className={`fixed top-6 right-6 z-50 px-6 py-3 rounded-xl shadow-lg text-white transition-all duration-300 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}
+      role="alert">
+      <div className="flex items-center gap-2">
+        <span>{type === 'success' ? '✔️' : '❌'}</span>
+        <span>{message}</span>
+        <button className="ml-4 text-lg font-bold" onClick={onClose}>&times;</button>
+      </div>
+    </div>
+  );
+}
+
 
 interface BillHistory {
   billId: number;
@@ -18,15 +32,19 @@ interface BillHistory {
   patientName?: string; // for future use if API provides
 }
 
+
 export default function PharmacistHistoryPage() {
   const [bills, setBills] = useState<BillHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   // Filter/search state
   const [search, setSearch] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [sellTypeFilter, setSellTypeFilter] = useState('');
+  // Toast state
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  // Delete confirmation state
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchBills = async () => {
@@ -161,6 +179,9 @@ export default function PharmacistHistoryPage() {
           <div className="text-sm text-gray-600 mb-2">
             Showing {filteredBills.length} of {bills.length} records
           </div>
+          {toast && (
+            <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+          )}
           {loading ? (
             <div className="text-center py-8 text-lg">Loading...</div>
           ) : error ? (
@@ -177,16 +198,17 @@ export default function PharmacistHistoryPage() {
                     <th className="p-2 border">Patient Phone</th>
                     <th className="p-2 border">Sell Type</th>
                     <th className="p-2 border">Total Bill</th>
+                    <th className="p-2 border">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredBills.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-8 text-gray-500">No bills found.</td>
+                      <td colSpan={8} className="text-center py-8 text-gray-500">No bills found.</td>
                     </tr>
                   ) : (
                     filteredBills.map((bill) => (
-                      <tr key={bill.billId} className="text-center border-b hover:bg-green-50">
+                      <tr key={bill.billId} className="text-center border-b hover:bg-green-50 transition-all">
                         <td className="p-2 border">{bill.date}</td>
                         <td className="p-2 border">{bill.prescriptionId ?? '-'}</td>
                         <td className="p-2 border">{bill.patientId ?? '-'}</td>
@@ -194,6 +216,49 @@ export default function PharmacistHistoryPage() {
                         <td className="p-2 border">{bill.patientPhone}</td>
                         <td className="p-2 border">{bill.sellType ? 'Normal Sell (Patient)' : 'Quick Sell (General)'}</td>
                         <td className="p-2 border font-semibold">৳{bill.total.toFixed(2)}</td>
+                        <td className="p-2 border">
+                          <button
+                            title="Delete Bill"
+                            className={`group relative flex items-center justify-center mx-auto rounded-full p-2 transition-all duration-200 ${deletingId === bill.billId ? 'opacity-60 pointer-events-none' : 'hover:bg-red-100'}`}
+                            onClick={() => setDeletingId(bill.billId)}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-6 h-6 text-red-600 group-hover:scale-110 group-hover:text-red-800 transition-transform">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m2 0v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7h12z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M10 11v6m4-6v6" />
+                            </svg>
+                          </button>
+                          {/* Confirmation Dialog */}
+                          {deletingId === bill.billId && (
+                            <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30">
+                              <div className="bg-white rounded-xl shadow-2xl p-8 max-w-xs w-full border border-red-200 flex flex-col items-center animate-fadeIn">
+                                <div className="text-3xl mb-2 text-red-600">🗑️</div>
+                                <div className="font-semibold text-lg mb-4 text-center">Delete this bill?</div>
+                                <div className="text-gray-600 mb-6 text-center text-sm">This action cannot be undone.</div>
+                                <div className="flex gap-4 w-full">
+                                  <button
+                                    className="flex-1 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold transition"
+                                    onClick={() => setDeletingId(null)}
+                                  >Cancel</button>
+                                  <button
+                                    className="flex-1 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition shadow"
+                                    onClick={async () => {
+                                      try {
+                                        const res = await fetch(`http://localhost:8080/api/bills/${bill.billId}`, { method: 'DELETE' });
+                                        if (!res.ok) throw new Error('Failed to delete bill');
+                                        setBills((prev) => prev.filter((b) => b.billId !== bill.billId));
+                                        setToast({ message: 'Bill deleted successfully!', type: 'success' });
+                                      } catch (err: any) {
+                                        setToast({ message: err.message || 'Failed to delete bill', type: 'error' });
+                                      } finally {
+                                        setDeletingId(null);
+                                      }
+                                    }}
+                                  >Delete</button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </td>
                       </tr>
                     ))
                   )}
@@ -202,7 +267,6 @@ export default function PharmacistHistoryPage() {
             </div>
           )}
         </div>
-
       </main>
       <Footer />
     </div>
