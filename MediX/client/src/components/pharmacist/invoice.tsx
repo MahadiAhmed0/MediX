@@ -9,21 +9,51 @@ type Item = {
   discount: string;
 };
 
-export default function Invoice() {
+interface InvoiceProps {
+  date?: string;
+  items?: Array<{
+    qty: string;
+    name: string;
+    price: string;
+    discount: string;
+  }>;
+  customerName?: string;
+  phoneNumber?: string;
+}
+
+export default function Invoice({ date: propDate, items: propItems, customerName: propCustomerName, phoneNumber: propPhoneNumber }: InvoiceProps) {
   // refs for table inputs: [row][col]
   const inputRefs = useRef<Array<Array<HTMLInputElement | null>>>([]);
 
-  const [customerName, setCustomerName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [customerName, setCustomerName] = useState(propCustomerName || "");
+  const [phoneNumber, setPhoneNumber] = useState(propPhoneNumber || "");
+  // Update state if customerName/phoneNumber props change
+  useEffect(() => {
+    if (propCustomerName !== undefined) setCustomerName(propCustomerName);
+  }, [propCustomerName]);
+
+  useEffect(() => {
+    if (propPhoneNumber !== undefined) setPhoneNumber(propPhoneNumber);
+  }, [propPhoneNumber]);
   const [companyName, setCompanyName] = useState("");
   const [address, setAddress] = useState("");
   
   // Set the default date to the current date
-  const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
-  
-  const [items, setItems] = useState<Item[]>([
-    { qty: "1", name: "", price: "0", discount: "0" },
-  ]);
+  const [date, setDate] = useState<string>(propDate || new Date().toISOString().split("T")[0]);
+  const [items, setItems] = useState<Item[]>(
+    propItems && propItems.length > 0
+      ? propItems
+      : [{ qty: "1", name: "", price: "0", discount: "0" }]
+  );
+
+  // Update state if props change
+  useEffect(() => {
+    if (propDate) setDate(propDate);
+  }, [propDate]);
+
+  useEffect(() => {
+    if (propItems && propItems.length > 0) setItems(propItems);
+  }, [propItems]);
 
   // Ensure refs array matches items
   useEffect(() => {
