@@ -1,9 +1,9 @@
-package com.Backend.MediXBackend.UserService;
+package com.Backend.MediXBackend.Service;
 
-import com.Backend.MediXBackend.User.Doctor;
-import com.Backend.MediXBackend.User.User;
-import com.Backend.MediXBackend.UserRepository.DoctorRepository;
-import com.Backend.MediXBackend.UserRepository.UserRepository;
+import com.Backend.MediXBackend.Model.Doctor;
+import com.Backend.MediXBackend.Model.User;
+import com.Backend.MediXBackend.Repository.DoctorRepository;
+import com.Backend.MediXBackend.Repository.UserRepository;
 import com.Backend.MediXBackend.Utils.IdGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

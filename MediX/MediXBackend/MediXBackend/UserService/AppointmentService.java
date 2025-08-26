@@ -1,12 +1,12 @@
-package com.Backend.MediXBackend.UserService;
+package com.Backend.MediXBackend.Service;
 
-import com.Backend.MediXBackend.User.Appointment;
-import com.Backend.MediXBackend.User.AppointmentWithDetails;
-import com.Backend.MediXBackend.User.Doctor;
-import com.Backend.MediXBackend.User.Patient;
-import com.Backend.MediXBackend.UserRepository.AppointmentRepository;
-import com.Backend.MediXBackend.UserRepository.DoctorRepository;
-import com.Backend.MediXBackend.UserRepository.PatientRepository;
+import com.Backend.MediXBackend.Model.Appointment;
+import com.Backend.MediXBackend.Model.AppointmentWithDetails;
+import com.Backend.MediXBackend.Model.Doctor;
+import com.Backend.MediXBackend.Model.Patient;
+import com.Backend.MediXBackend.Repository.AppointmentRepository;
+import com.Backend.MediXBackend.Repository.DoctorRepository;
+import com.Backend.MediXBackend.Repository.PatientRepository;
 import com.Backend.MediXBackend.Utils.IdGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

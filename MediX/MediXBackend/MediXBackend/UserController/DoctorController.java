@@ -1,10 +1,10 @@
-package com.Backend.MediXBackend.UserController;
+package com.Backend.MediXBackend.Controller;
 
-import com.Backend.MediXBackend.User.Doctor;
-import com.Backend.MediXBackend.User.User;
-import com.Backend.MediXBackend.UserRepository.DoctorRepository;
-import com.Backend.MediXBackend.UserRepository.UserRepository;
-import com.Backend.MediXBackend.UserService.DoctorService;
+import com.Backend.MediXBackend.Model.Doctor;
+import com.Backend.MediXBackend.Model.User;
+import com.Backend.MediXBackend.Repository.DoctorRepository;
+import com.Backend.MediXBackend.Repository.UserRepository;
+import com.Backend.MediXBackend.Service.DoctorService;
 import com.Backend.MediXBackend.Utils.IdGeneratorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;

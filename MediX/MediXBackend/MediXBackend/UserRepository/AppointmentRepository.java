@@ -1,6 +1,6 @@
-package com.Backend.MediXBackend.UserRepository;
+package com.Backend.MediXBackend.Repository;
 
-import com.Backend.MediXBackend.User.Appointment;
+import com.Backend.MediXBackend.Model.Appointment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

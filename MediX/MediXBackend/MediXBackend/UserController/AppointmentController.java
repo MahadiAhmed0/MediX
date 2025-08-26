@@ -1,8 +1,8 @@
-package com.Backend.MediXBackend.UserController;
+package com.Backend.MediXBackend.Controller;
 
-import com.Backend.MediXBackend.User.Appointment;
-import com.Backend.MediXBackend.User.AppointmentWithDetails;
-import com.Backend.MediXBackend.UserService.AppointmentService;
+import com.Backend.MediXBackend.Model.Appointment;
+import com.Backend.MediXBackend.Model.AppointmentWithDetails;
+import com.Backend.MediXBackend.Service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;

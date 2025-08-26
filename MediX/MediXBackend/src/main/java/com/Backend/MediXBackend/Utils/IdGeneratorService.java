@@ -1,10 +1,11 @@
 package com.Backend.MediXBackend.Utils;
 
-import com.Backend.MediXBackend.UserRepository.*;
+import com.Backend.MediXBackend.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Year;
+import java.util.Optional;
 
 @Service
 public class IdGeneratorService {
@@ -18,6 +19,8 @@ public class IdGeneratorService {
     private AppointmentRepository appointmentRepo;
     @Autowired
     private ReceptionistRepository receptionistRepo;
+    @Autowired
+    private PharmacistRepository pharmacistRepository;
 
     public synchronized Long generateDoctorUserId(int professionCode) {
         int year = Year.now().getValue() % 100;  // e.g., 2025 → 25
@@ -70,6 +73,19 @@ public class IdGeneratorService {
         // If we've reached the limit, throw an exception
         throw new RuntimeException("Maximum number of receptionists (2502999) reached");
     }
+    // Add this method to your existing IdGeneratorService class
+    public Long generatePharmacistId() {
+        Optional<Long> maxId = pharmacistRepository.findMaxPharmacistId();
+        Long nextId = maxId.orElse(2503000L) + 1;
 
+        // Ensure the ID stays within the pharmacist range
+        if (nextId < 2503001) {
+            nextId = 2503001L;
+        } else if (nextId > 2503999) {
+            throw new RuntimeException("Maximum pharmacist limit reached");
+        }
+
+        return nextId;
+    }
 
 }

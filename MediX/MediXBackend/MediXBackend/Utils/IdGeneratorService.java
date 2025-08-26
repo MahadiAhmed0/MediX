@@ -1,9 +1,9 @@
 package com.Backend.MediXBackend.Utils;
 
-import com.Backend.MediXBackend.UserRepository.AppointmentRepository;
-import com.Backend.MediXBackend.UserRepository.DoctorRepository;
-import com.Backend.MediXBackend.UserRepository.PatientRepository;
-import com.Backend.MediXBackend.UserRepository.UserRepository;
+import com.Backend.MediXBackend.Repository.AppointmentRepository;
+import com.Backend.MediXBackend.Repository.DoctorRepository;
+import com.Backend.MediXBackend.Repository.PatientRepository;
+import com.Backend.MediXBackend.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

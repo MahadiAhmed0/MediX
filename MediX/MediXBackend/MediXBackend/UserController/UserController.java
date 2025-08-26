@@ -1,7 +1,7 @@
-package com.Backend.MediXBackend.UserController;
+package com.Backend.MediXBackend.Controller;
 
-import com.Backend.MediXBackend.User.User;
-import com.Backend.MediXBackend.UserRepository.UserRepository;
+import com.Backend.MediXBackend.Model.User;
+import com.Backend.MediXBackend.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
