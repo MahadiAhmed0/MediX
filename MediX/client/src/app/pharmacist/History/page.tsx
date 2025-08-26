@@ -36,7 +36,37 @@ export default function PharmacistHistoryPage() {
         const res = await fetch('http://localhost:8080/api/bills/history');
         if (!res.ok) throw new Error('Failed to fetch bill history');
         const data = await res.json();
-        setBills(data);
+        // Fetch patient names for bills with patientId, and for quick sells fetch name by phone
+        const billsWithNames = await Promise.all(
+          data.map(async (bill: BillHistory) => {
+            if (bill.patientId) {
+              try {
+                const patientRes = await fetch(`http://localhost:8080/api/patients/${bill.patientId}`);
+                if (patientRes.ok) {
+                  const patientData = await patientRes.json();
+                  return { ...bill, patientName: patientData.name || '-' };
+                }
+              } catch {}
+            } else if (!bill.sellType && bill.patientPhone) {
+              // Quick sell: fetch name by phone
+              try {
+                const quickRes = await fetch(`http://localhost:8080/api/bills/phone/${encodeURIComponent(bill.patientPhone)}`);
+                if (quickRes.ok) {
+                  const quickData = await quickRes.json();
+                  // Try to get the name from the first bill with a name
+                  const found = Array.isArray(quickData)
+                    ? quickData.find((b: any) => b.customerName && b.customerName.trim() !== '')
+                    : null;
+                  if (found && found.customerName) {
+                    return { ...bill, patientName: found.customerName };
+                  }
+                }
+              } catch {}
+            }
+            return { ...bill, patientName: '-' };
+          })
+        );
+        setBills(billsWithNames);
       } catch (err: any) {
         setError(err.message || 'Unknown error');
       } finally {
@@ -160,7 +190,7 @@ export default function PharmacistHistoryPage() {
                         <td className="p-2 border">{bill.date}</td>
                         <td className="p-2 border">{bill.prescriptionId ?? '-'}</td>
                         <td className="p-2 border">{bill.patientId ?? '-'}</td>
-                        <td className="p-2 border">{/* Patient name not provided in API */}-</td>
+                        <td className="p-2 border">{bill.patientName ?? '-'}</td>
                         <td className="p-2 border">{bill.patientPhone}</td>
                         <td className="p-2 border">{bill.sellType ? 'Normal Sell (Patient)' : 'Quick Sell (General)'}</td>
                         <td className="p-2 border font-semibold">৳{bill.total.toFixed(2)}</td>

@@ -1,6 +1,21 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+// Helper: fetch all medicine names
+async function fetchMedicineNames() {
+  try {
+    const res = await fetch("http://localhost:8080/api/medicines");
+    const data = await res.json();
+    if (Array.isArray(data)) {
+      return data.map((m: any) => m.name || m.medicineName || "").filter(Boolean);
+    } else if (Array.isArray(data.data)) {
+      return data.data.map((m: any) => m.name || m.medicineName || "").filter(Boolean);
+    }
+    return [];
+  } catch {
+    return [];
+  }
+}
 
 type Item = {
   qty: string;
@@ -26,6 +41,14 @@ interface InvoiceProps {
 }
 
 export default function Invoice({ date: propDate, setDate, items: propItems, setItems, customerName: propCustomerName, setCustomerName, phoneNumber: propPhoneNumber, setPhoneNumber }: InvoiceProps) {
+  // Autocomplete state
+  const [medicineNames, setMedicineNames] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<{[key:number]: string[]}>({});
+  const [showSuggestions, setShowSuggestions] = useState<{[key:number]: boolean}>({});
+  // Fetch medicine names on mount
+  useEffect(() => {
+    fetchMedicineNames().then(setMedicineNames);
+  }, []);
   // refs for table inputs: [row][col]
   const inputRefs = useRef<Array<Array<HTMLInputElement | null>>>([]);
 
@@ -77,6 +100,42 @@ export default function Invoice({ date: propDate, setDate, items: propItems, set
     };
     if (setItems) setItems(updated);
     else localSetItems(updated);
+
+    // Autocomplete: update suggestions for name field
+    if (field === "name") {
+      const input = value.trim().toLowerCase();
+      if (input.length > 0) {
+        const filtered = medicineNames.filter((n) => n.toLowerCase().includes(input));
+        setSuggestions((prev) => ({ ...prev, [index]: filtered }));
+        setShowSuggestions((prev) => ({ ...prev, [index]: true }));
+      } else {
+        setSuggestions((prev) => ({ ...prev, [index]: medicineNames }));
+        setShowSuggestions((prev) => ({ ...prev, [index]: false }));
+      }
+    }
+  };
+  // When user selects a suggestion
+  // Fetch unit price for a medicine name
+  const fetchUnitPrice = async (medicineName: string) => {
+    try {
+      const res = await fetch(`http://localhost:8080/api/medicines/name/${encodeURIComponent(medicineName)}`);
+      const data = await res.json();
+      if (data && data.unitPrice !== undefined) {
+        return data.unitPrice.toString();
+      }
+    } catch {}
+    return "0";
+  };
+
+  // When user selects a suggestion
+  const handleSelectSuggestion = async (rowIdx: number, name: string) => {
+    // Fetch unit price and update both name and price
+    const price = await fetchUnitPrice(name);
+    const updated = [...items];
+    updated[rowIdx] = { ...updated[rowIdx], name, price };
+    if (setItems) setItems(updated);
+    else localSetItems(updated);
+    setShowSuggestions((prev) => ({ ...prev, [rowIdx]: false }));
   };
 
   const addItem = () => {
@@ -189,17 +248,92 @@ export default function Invoice({ date: propDate, setDate, items: propItems, set
                 />
               </td>
               <td className="p-2 border">
-                <input
-                  type="text"
-                  value={item.name}
-                  onChange={(e) => handleItemChange(idx, "name", e.target.value)}
-                  className="w-full border rounded px-1"
-                  ref={el => {
-                    inputRefs.current[idx] = inputRefs.current[idx] || [];
-                    inputRefs.current[idx][1] = el;
-                  }}
-                  onKeyDown={e => handleKeyDown(idx, 1, e)}
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    type="text"
+                    value={item.name}
+                    onChange={e => {
+                      // Only allow values from medicineNames
+                      handleItemChange(idx, "name", e.target.value);
+                    }}
+                    className="w-full border rounded px-1"
+                    ref={el => {
+                      inputRefs.current[idx] = inputRefs.current[idx] || [];
+                      inputRefs.current[idx][1] = el;
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === "Enter" && suggestions[idx]?.length) {
+                        handleSelectSuggestion(idx, suggestions[idx][0]);
+                        e.preventDefault();
+                      } else {
+                        handleKeyDown(idx, 1, e);
+                      }
+                    }}
+                    onFocus={() => {
+                      if (item.name) {
+                        const filtered = medicineNames.filter((n) => n.toLowerCase().includes(item.name.toLowerCase()));
+                        setSuggestions((prev) => ({ ...prev, [idx]: filtered }));
+                        setShowSuggestions((prev) => ({ ...prev, [idx]: true }));
+                      } else {
+                        setSuggestions((prev) => ({ ...prev, [idx]: medicineNames }));
+                        setShowSuggestions((prev) => ({ ...prev, [idx]: true }));
+                      }
+                    }}
+                    onBlur={() => {
+                      setTimeout(() => setShowSuggestions((prev) => ({ ...prev, [idx]: false })), 100);
+                    }}
+                    list={`medicines-list-${idx}`}
+                    autoComplete="off"
+                  />
+                  {/* Suggestions dropdown */}
+                  {showSuggestions[idx] && suggestions[idx]?.length > 0 && (
+                    <ul
+                      style={{
+                        position: "absolute",
+                        zIndex: 20,
+                        background: "#fff",
+                        border: "1px solid #4ade80",
+                        width: "100%",
+                        maxHeight: 180,
+                        overflowY: "auto",
+                        margin: 0,
+                        padding: 0,
+                        listStyle: "none",
+                        boxShadow: "0 4px 16px 0 rgba(34,197,94,0.15)",
+                        borderRadius: 8,
+                        animation: 'fadeIn 0.2s',
+                      }}
+                    >
+                      {suggestions[idx].map((option, sidx) => (
+                        <li
+                          key={option}
+                          style={{
+                            padding: "10px 16px",
+                            cursor: "pointer",
+                            borderBottom: sidx !== suggestions[idx].length - 1 ? "1px solid #e5e7eb" : "none",
+                            background: option === item.name ? "#bbf7d0" : "#fff",
+                            color: option === item.name ? "#166534" : "#222",
+                            fontWeight: option === item.name ? 600 : 400,
+                            transition: "background 0.15s, color 0.15s",
+                          }}
+                          onMouseDown={() => handleSelectSuggestion(idx, option)}
+                          onMouseEnter={e => {
+                            // Optionally highlight on hover
+                          }}
+                        >
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <svg width="18" height="18" fill="#4ade80" style={{ marginRight: 4 }} viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#bbf7d0" /><text x="10" y="15" textAnchor="middle" fontSize="10" fill="#166534">💊</text></svg>
+                            {option}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                {/* Only allow selection from available medicine names */}
+                {item.name && !medicineNames.includes(item.name) && (
+                  <div className="text-xs text-red-600">Please select a valid medicine name.</div>
+                )}
               </td>
               <td className="p-2 border">
                 <input

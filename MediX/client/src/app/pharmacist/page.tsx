@@ -13,19 +13,62 @@ const dummySales = [
   { name: "Amoxil", sold: 12 },
   { name: "Ciprocin", sold: 10 },
 ];
-const dummyRevenue = {
-  today: 5000,
-  week: 32000,
-  month: 150000,
-};
+
+interface BillHistory {
+  billId: number;
+  date: string;
+  prescriptionId: number | null;
+  patientId: number | null;
+  patientPhone: string;
+  sellType: boolean;
+  total: number;
+  patientName?: string;
+}
 
 
 export default function PharmacistHome() {
   const [topSelling, setTopSelling] = useState(dummySales);
   const [expiryAlert, setExpiryAlert] = useState<{ name: string; expiry: string; daysLeft: number }[]>([]);
   const [stockAlert, setStockAlert] = useState<{ name: string; quantity: number }[]>([]);
-  const [revenue, setRevenue] = useState(dummyRevenue);
+
+  const [revenue, setRevenue] = useState({ today: 0, week: 0, month: 0 });
   const [selectedRevenue, setSelectedRevenue] = useState<'today' | 'week' | 'month'>('today');
+
+  useEffect(() => {
+    // Fetch bill history and compute revenue
+    const fetchRevenue = async () => {
+      try {
+        const res = await fetch('http://localhost:8080/api/bills/history');
+        if (!res.ok) throw new Error('Failed to fetch bill history');
+        const bills: BillHistory[] = await res.json();
+        const today = new Date();
+        const getDateString = (d: Date) => d.toISOString().slice(0, 10);
+        const isToday = (dateStr: string) => dateStr === getDateString(today);
+        const isThisWeek = (dateStr: string) => {
+          const d = new Date(dateStr);
+          const firstDayOfWeek = new Date(today);
+          firstDayOfWeek.setDate(today.getDate() - today.getDay());
+          const lastDayOfWeek = new Date(firstDayOfWeek);
+          lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6);
+          return d >= firstDayOfWeek && d <= lastDayOfWeek;
+        };
+        const isThisMonth = (dateStr: string) => {
+          const d = new Date(dateStr);
+          return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth();
+        };
+        let todaySum = 0, weekSum = 0, monthSum = 0;
+        for (const bill of bills) {
+          if (isToday(bill.date)) todaySum += bill.total;
+          if (isThisWeek(bill.date)) weekSum += bill.total;
+          if (isThisMonth(bill.date)) monthSum += bill.total;
+        }
+        setRevenue({ today: todaySum, week: weekSum, month: monthSum });
+      } catch {
+        setRevenue({ today: 0, week: 0, month: 0 });
+      }
+    };
+    fetchRevenue();
+  }, []);
 
   useEffect(() => {
     // Fetch medicines from backend and compute alerts

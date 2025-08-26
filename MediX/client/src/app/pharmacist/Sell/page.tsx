@@ -29,14 +29,14 @@ export default function SellPage() {
     }
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/prescriptions/${prescriptionId}`);
+      const response = await fetch(`http://localhost:8080/api/prescriptions/${encodeURIComponent(prescriptionId)}`);
       const data = await response.json();
       if (!data.success) {
         alert("Prescription not found.");
-  setInvoiceDate("");
-  setInvoiceItems([{ qty: "1", name: "", price: "0", discount: "0" }]);
-  setCustomerName("");
-  setPhoneNumber("");
+        setInvoiceDate("");
+        setInvoiceItems([{ qty: "1", name: "", price: "0", discount: "0" }]);
+        setCustomerName("");
+        setPhoneNumber("");
         return;
       }
       setInvoiceDate(data.data.prescriptionDate || "");
@@ -87,10 +87,10 @@ export default function SellPage() {
     } catch (error) {
       console.error("Error fetching prescription:", error);
       alert("Error fetching prescription data.");
-  setInvoiceDate("");
-  setInvoiceItems([{ qty: "1", name: "", price: "0", discount: "0" }]);
-  setCustomerName("");
-  setPhoneNumber("");
+      setInvoiceDate("");
+      setInvoiceItems([{ qty: "1", name: "", price: "0", discount: "0" }]);
+      setCustomerName("");
+      setPhoneNumber("");
     } finally {
       setLoading(false);
     }
@@ -182,16 +182,15 @@ export default function SellPage() {
                     type="text"
                     value={prescriptionId}
                     onChange={(e) => setPrescriptionId(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleFetchPrescription();
+                      }
+                    }}
                     className="border border-green-400 w-80 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300 bg-white text-black shadow-sm transition"
                     placeholder="Enter Prescription ID"
-                  />
-                  <button
-                    onClick={handleFetchPrescription}
-                    className="ml-2 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
                     disabled={loading}
-                  >
-                    {loading ? 'Loading...' : 'Fetch'}
-                  </button>
+                  />
                 </div>
               </div>
             </div>
