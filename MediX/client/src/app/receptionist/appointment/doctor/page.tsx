@@ -283,7 +283,7 @@ export default function DoctorListPage() {
                       key={doctor.doctorId}
                       onClick={() => {
                         router.push(
-                          `/receptionist/appointment?doctorId=${
+                          `/receptionist/appointment/add?doctorId=${
                             doctor.doctorId
                           }&doctorName=${encodeURIComponent(doctor.user.name)}`
                         );

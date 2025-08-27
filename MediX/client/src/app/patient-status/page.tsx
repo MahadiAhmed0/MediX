@@ -132,6 +132,23 @@ export default function PatientStatusPage() {
     }
   }, [searchParams]);
 
+  // Fetch patient info by patientId
+  const fetchAndSetPatientInfo = async (patientId: string) => {
+    try {
+      const patientResponse = await fetch(
+        `http://localhost:8080/api/patients/${patientId}`
+      );
+      if (patientResponse.ok) {
+        const patientData: PatientInfo = await patientResponse.json();
+        setPatientInfo(patientData);
+      } else {
+        setPatientInfo(null);
+      }
+    } catch (error) {
+      setPatientInfo(null);
+    }
+  };
+
   const handleSearchWithToken = async (tokenId: string) => {
     if (!tokenId.trim()) {
       setError("Please enter your token number");
@@ -143,6 +160,9 @@ export default function PatientStatusPage() {
     setShowResults(false);
 
     try {
+      // Fetch patient info
+      await fetchAndSetPatientInfo(tokenId);
+
       // Fetch appointments
       const appointmentsResponse = await fetch(
         `http://localhost:8080/api/appointments/patient/${tokenId}`
@@ -245,27 +265,47 @@ export default function PatientStatusPage() {
                 <div className="relative mb-3">
                   {step.id <= currentStep ? (
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg transform transition-all duration-300 hover:scale-105">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="w-8 h-8 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={3}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     </div>
                   ) : (
                     <div className="w-16 h-16 rounded-full border-3 border-gray-300 bg-gray-100 flex items-center justify-center transition-all duration-300">
-                      <span className="text-xl font-bold text-gray-400">{step.id}</span>
+                      <span className="text-xl font-bold text-gray-400">
+                        {step.id}
+                      </span>
                     </div>
                   )}
                 </div>
-                
+
                 {/* Step Info */}
                 <div className="text-center">
                   <div className="text-2xl mb-2">{step.icon}</div>
-                  <h3 className={`text-sm font-semibold ${step.id <= currentStep ? 'text-green-700' : 'text-gray-500'}`}>
+                  <h3
+                    className={`text-sm font-semibold ${
+                      step.id <= currentStep
+                        ? "text-green-700"
+                        : "text-gray-500"
+                    }`}
+                  >
                     {step.name}
                   </h3>
                   {step.id === currentStep && (
                     <div className="mt-2">
                       <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                      <span className="ml-1 text-xs text-green-600 font-medium">Current</span>
+                      <span className="ml-1 text-xs text-green-600 font-medium">
+                        Current
+                      </span>
                     </div>
                   )}
                 </div>
@@ -275,7 +315,11 @@ export default function PatientStatusPage() {
 
           {/* Status Badge */}
           <div className="flex justify-center mt-6">
-            <div className={`px-6 py-3 rounded-full font-semibold text-sm shadow-md ${getStatusColor(status)}`}>
+            <div
+              className={`px-6 py-3 rounded-full font-semibold text-sm shadow-md ${getStatusColor(
+                status
+              )}`}
+            >
               <div className="flex items-center">
                 <div className="w-2 h-2 rounded-full bg-current mr-2 animate-pulse"></div>
                 Status: {status === "NOT_READY" ? "ACCEPTED" : status}
@@ -655,7 +699,7 @@ export default function PatientStatusPage() {
               htmlFor="patientId"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Token Number (Patient ID)
+              Token Number
               {searchParams?.get("token") && (
                 <span className="ml-2 text-xs text-green-600 font-medium">
                   ✓ Auto-filled from booking
@@ -736,7 +780,8 @@ export default function PatientStatusPage() {
                   ) : (
                     <div className="space-y-4">
                       <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                        Your Appointments
+                        {patientInfo ? patientInfo.name + "'s" : "Patient's"}{" "}
+                        Appointments
                       </h2>
                       {appointments.map((appointment) => (
                         <div
@@ -770,14 +815,6 @@ export default function PatientStatusPage() {
                               </p>
                               <p className="font-medium text-gray-900">
                                 {appointment.patientId}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">
-                                Appointment ID
-                              </p>
-                              <p className="font-medium text-gray-900">
-                                {appointment.id}
                               </p>
                             </div>
                           </div>

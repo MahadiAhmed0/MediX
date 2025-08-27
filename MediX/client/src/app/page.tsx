@@ -283,7 +283,7 @@ export default function Home() {
                           </span>
                         </div>
                         <span className="text-lg font-medium">
-                          Instant Doctor Access
+                          Seamless Doctor Appointment
                         </span>
                       </div>
 
@@ -614,12 +614,14 @@ export default function Home() {
             >
               Book Your Appointment
             </Link>
-            <Link
-              href="/patient-status"
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSdb4DJ6meoTb-rUdISAKvSDO4dGZqp9gCTxobc8w5ZsB18W7Q/viewform?usp=dialog"
+              target="_blank"
+              rel="noopener noreferrer"
               className="bg-white text-green-600 hover:bg-gray-100 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
-              Check Your Status
-            </Link>
+              Provide Feedback
+            </a>
             <Link
               href="/signin"
               className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-200 transform hover:scale-105"
