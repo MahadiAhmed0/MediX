@@ -162,7 +162,8 @@ export default function PrescriptionPreview() {
                 <div className="absolute z-10 top-[350px] left-[370px] w-[500px] h-[613px] flex flex-col gap-4 p-2 overflow-y-auto">
                   {data.medicines.map((med, idx) => (
                     <div key={idx} className="mb-2">
-                      <div className="font-bold text-lg text-green-900 mb-1">
+                      <div className="flex items-center font-bold text-lg text-green-900 mb-1">
+                        <span className="mr-2">{idx + 1}.</span>
                         {med.name}
                       </div>
                       <div className="text-sm text-green-800 mb-1">

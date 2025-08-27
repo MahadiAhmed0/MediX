@@ -7,6 +7,32 @@ import { useSearchParams, useRouter } from "next/navigation";
 import medicineCommentsData from "@/data/medicineComments.json";
 
 export default function Prescribe() {
+  // Medicine type for backend API
+  type MedicineFromAPI = {
+    id: number;
+    company: string;
+    medicineName: string;
+    genericName: string;
+    quantity: number;
+    unitCost: number;
+    unitPrice: number;
+    expiryDate: string;
+  };
+  // State for all medicines from backend
+  const [allMedicines, setAllMedicines] = useState<MedicineFromAPI[]>([]);
+  // State for medicine name input disclaimer
+  const [medicineNameWarnings, setMedicineNameWarnings] = useState<{
+    [idx: number]: boolean;
+  }>({});
+  // Fetch all medicines from backend on mount (in-memory, most efficient for this use case)
+  useEffect(() => {
+    fetch("http://localhost:8080/api/medicines")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setAllMedicines(data);
+      })
+      .catch(() => setAllMedicines([]));
+  }, []);
   const [showHistory, setShowHistory] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -269,7 +295,17 @@ export default function Prescribe() {
     setMedicines((prev) =>
       prev.map((med, i) => {
         if (i !== idx) return med;
-        if (field === "name") return { ...med, name: value };
+        if (field === "name") {
+          // Check if name is in stock
+          const inStock = allMedicines.some(
+            (m) => m.medicineName.toLowerCase() === value.trim().toLowerCase()
+          );
+          setMedicineNameWarnings((prevWarn) => ({
+            ...prevWarn,
+            [idx]: !inStock && value.trim() !== "",
+          }));
+          return { ...med, name: value };
+        }
         if (field === "comment") return { ...med, comment: value };
         if (field === "num" && numIdx !== undefined) {
           const newNums = [...med.nums];
@@ -1265,7 +1301,7 @@ export default function Prescribe() {
                     key={idx}
                     className="border border-gray-200 rounded-xl p-4 bg-gray-50 relative overflow-visible"
                   >
-                    <div className="flex flex-col mb-2">
+                    <div className="flex flex-col mb-2 relative">
                       <label className="mb-1 text-sm font-medium text-gray-700">
                         Medicine Name
                       </label>
@@ -1276,9 +1312,32 @@ export default function Prescribe() {
                           handleMedicineChange(idx, "name", e.target.value)
                         }
                         className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+                        list={`medicine-suggestions-${idx}`}
+                        autoComplete="off"
                       />
+                      {/* Autosuggest dropdown using datalist */}
+                      <datalist id={`medicine-suggestions-${idx}`}>
+                        {allMedicines
+                          .filter((m) =>
+                            med.name.trim() === ""
+                              ? true
+                              : m.medicineName
+                                  .toLowerCase()
+                                  .includes(med.name.trim().toLowerCase())
+                          )
+                          .slice(0, 10)
+                          .map((m) => (
+                            <option key={m.id} value={m.medicineName} />
+                          ))}
+                      </datalist>
+                      {/* Disclaimer if not in stock */}
+                      {medicineNameWarnings[idx] && (
+                        <span className="text-xs text-red-600 mt-1 absolute left-0 top-full">
+                          This medicine is not available in the stock.
+                        </span>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex flex-between items-center gap-2 mb-2 mt-10">
                       <label className="text-sm font-medium text-gray-700 mr-2">
                         Dosage
                       </label>
@@ -1340,25 +1399,25 @@ export default function Prescribe() {
                         className="w-12 border border-gray-300 rounded-lg px-2 py-1 text-center focus:outline-none focus:ring-2 focus:ring-green-400"
                         min="0"
                       />
+                      <span className="ml-4 text-sm font-medium text-gray-700">
+                        Days
+                      </span>
+                      <input
+                        type="number"
+                        value={med.numberOfDays}
+                        onChange={(e) =>
+                          handleMedicineChange(
+                            idx,
+                            "numberOfDays",
+                            e.target.value
+                          )
+                        }
+                        className="w-16 border border-gray-300 rounded-lg px-2 py-1 text-center focus:outline-none focus:ring-2 focus:ring-green-400"
+                        min="1"
+                        placeholder="Days"
+                      />
                     </div>
-                    <span className="ml-4 text-sm font-medium text-gray-700">
-                      Days
-                    </span>
-                    <input
-                      type="number"
-                      value={med.numberOfDays}
-                      onChange={(e) =>
-                        handleMedicineChange(
-                          idx,
-                          "numberOfDays",
-                          e.target.value
-                        )
-                      }
-                      className="w-16 border border-gray-300 rounded-lg px-2 py-1 text-center focus:outline-none focus:ring-2 focus:ring-green-400"
-                      min="1"
-                      placeholder="Days"
-                    />
-                    <div className="flex flex-col mb-2 relative">
+                    <div className="flex flex-col mb-2 relative mt-5">
                       <textarea
                         ref={(el) => {
                           commentRefs.current[idx] = el;
