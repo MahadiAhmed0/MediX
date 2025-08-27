@@ -410,7 +410,7 @@ export default function AddAppointmentPage() {
       </nav>
 
       {/* Body Content */}
-      <main className="flex-grow bg-[#f2fff7] text-gray-900 rounded-t-3xl shadow-inner mx-6 mb-10 p-10 max-w-4xl mx-auto">
+      <main className="flex-grow bg-[#f2fff7] text-gray-900 rounded-t-3xl shadow-inner mx-6 mb-10 p-10  mx-[420px]">
         <h1 className="text-3xl font-bold mb-8 text-gray-800 text-center">
           Patient Info
         </h1>
@@ -647,7 +647,7 @@ export default function AddAppointmentPage() {
                 clickedAdd ? "scale-95" : "scale-100"
               }`}
             >
-              Add Patient
+              Add Appointment
             </button>
             <button
               type="button"

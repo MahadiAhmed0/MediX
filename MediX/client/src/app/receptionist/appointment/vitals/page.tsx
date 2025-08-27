@@ -392,7 +392,7 @@ export default function VitalsPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Input Fields */}
-              {["age", "gender", "weight (kg)", "pressure"].map((field) => {
+              {["age", "gender", "weight", "pressure"].map((field) => {
                 if (field === "gender") {
                   return (
                     <div>

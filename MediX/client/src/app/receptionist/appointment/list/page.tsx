@@ -13,7 +13,7 @@ export default function AppointmentPage() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState<"all" | "today" | "upcoming">(
-    "all"
+    "today"
   );
   const [showOldAppointments, setShowOldAppointments] = useState(false);
   const [showModal, setShowModal] = useState(false);

@@ -289,7 +289,7 @@ export default function BookAppointment() {
       const appointmentData = {
         patientId: currentPatientId,
         doctorId: parseInt(patient.doctor, 10),
-        appointmentDate: new Date().toISOString().split("T")[0], // Today's date
+        appointmentDate: patient.appointmentDate, // Use selected date
       };
 
       const appointmentResponse = await fetch(

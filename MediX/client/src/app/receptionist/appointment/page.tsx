@@ -84,14 +84,22 @@ export default function AppointmentPage() {
     }
   };
 
-  // Filter appointments based on search
-  const filteredRequests = appointmentRequests.filter(
-    (request) =>
-      request.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.patientPhone.includes(searchTerm) ||
-      request.appointmentDate.includes(searchTerm)
-  );
+  // Filter appointments: only today or future, then search
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const filteredRequests = appointmentRequests
+    .filter((request) => {
+      const reqDate = new Date(request.appointmentDate);
+      reqDate.setHours(0, 0, 0, 0);
+      return reqDate >= today;
+    })
+    .filter(
+      (request) =>
+        request.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.patientPhone.includes(searchTerm) ||
+        request.appointmentDate.includes(searchTerm)
+    );
 
   // Handle appointment confirmation
   const handleConfirmAppointment = async (
