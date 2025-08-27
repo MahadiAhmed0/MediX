@@ -27,6 +27,10 @@ public class PrescriptionMedicine {
     @Column(name = "evening_dose")
     private Integer eveningDose;
 
+
+    @Column(name = "number_of_days")
+    private Integer numberOfDays;
+
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
 
@@ -34,13 +38,15 @@ public class PrescriptionMedicine {
     public PrescriptionMedicine() {
     }
 
-    public PrescriptionMedicine(Prescription prescription, String medicineName, 
-                               Integer morningDose, Integer afternoonDose, Integer eveningDose, String comment) {
+
+    public PrescriptionMedicine(Prescription prescription, String medicineName,
+                               Integer morningDose, Integer afternoonDose, Integer eveningDose, Integer numberOfDays, String comment) {
         this.prescription = prescription;
         this.medicineName = medicineName;
         this.morningDose = morningDose;
         this.afternoonDose = afternoonDose;
         this.eveningDose = eveningDose;
+        this.numberOfDays = numberOfDays;
         this.comment = comment;
     }
 
@@ -91,6 +97,14 @@ public class PrescriptionMedicine {
 
     public void setEveningDose(Integer eveningDose) {
         this.eveningDose = eveningDose;
+    }
+
+    public Integer getNumberOfDays() {
+        return numberOfDays;
+    }
+
+    public void setNumberOfDays(Integer numberOfDays) {
+        this.numberOfDays = numberOfDays;
     }
 
     public String getComment() {

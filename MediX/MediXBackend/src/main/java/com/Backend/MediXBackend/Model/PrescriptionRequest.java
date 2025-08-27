@@ -18,7 +18,9 @@ public class PrescriptionRequest {
     public static class MedicineRequest {
         private String name;
         private String[] nums; // Array of 3 strings for morning-afternoon-evening
-        private String comment;
+
+    private Integer numberOfDays;
+    private String comment;
 
         // Getters and setters
         public String getName() {
@@ -35,6 +37,14 @@ public class PrescriptionRequest {
 
         public void setNums(String[] nums) {
             this.nums = nums;
+        }
+
+        public Integer getNumberOfDays() {
+            return numberOfDays;
+        }
+
+        public void setNumberOfDays(Integer numberOfDays) {
+            this.numberOfDays = numberOfDays;
         }
 
         public String getComment() {

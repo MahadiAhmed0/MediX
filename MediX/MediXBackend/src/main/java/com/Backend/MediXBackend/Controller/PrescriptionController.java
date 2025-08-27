@@ -148,9 +148,15 @@ public class PrescriptionController {
                         medicine.setEveningDose(0);
                     }
                     
+                    // Set number of days if provided
+                    if (medReq.getNumberOfDays() != null) {
+                        medicine.setNumberOfDays(medReq.getNumberOfDays());
+                    } else {
+                        medicine.setNumberOfDays(1); // Default to 1 if not provided
+                    }
                     medicines.add(medicine);
                     System.out.println("Added medicine: " + medicine.getMedicineName() + " with doses: " + 
-                                     medicine.getMorningDose() + "-" + medicine.getAfternoonDose() + "-" + medicine.getEveningDose());
+                                     medicine.getMorningDose() + "-" + medicine.getAfternoonDose() + "-" + medicine.getEveningDose() + ", days: " + medicine.getNumberOfDays());
                 } else {
                     System.out.println("Skipping medicine with empty name: '" + medReq.getName() + "'");
                 }

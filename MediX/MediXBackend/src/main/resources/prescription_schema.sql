@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS prescription_medicines (
     morning_dose INT DEFAULT 0,
     afternoon_dose INT DEFAULT 0,
     evening_dose INT DEFAULT 0,
+    number_of_days INT DEFAULT 1,
     comment TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (prescription_id) REFERENCES prescriptions(id) ON DELETE CASCADE

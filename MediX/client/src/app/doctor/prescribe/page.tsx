@@ -37,7 +37,7 @@ export default function Prescribe() {
 
   // Add state for dynamic medicine fields
   const [medicines, setMedicines] = useState([
-    { name: "", nums: ["", "", ""], comment: "" },
+    { name: "", nums: ["", "", ""], numberOfDays: "", comment: "" },
   ]);
 
   // Add state for prescription saving
@@ -139,7 +139,9 @@ export default function Prescribe() {
         localStorage.removeItem("patientData");
       }
       // Reset medicines to default when loading patient data
-      setMedicines([{ name: "", nums: ["", "", ""], comment: "" }]);
+      setMedicines([
+        { name: "", nums: ["", "", ""], numberOfDays: "", comment: "" },
+      ]);
       setPatientId(null);
       setPatientError("");
       setPatientFromUrl(false);
@@ -192,7 +194,9 @@ export default function Prescribe() {
         adv: "",
       });
       // Reset medicines to default when not editing
-      setMedicines([{ name: "", nums: ["", "", ""], comment: "" }]);
+      setMedicines([
+        { name: "", nums: ["", "", ""], numberOfDays: "", comment: "" },
+      ]);
       setPatientId(null);
       setPatientError("");
       setPatientFromUrl(false);
@@ -237,6 +241,14 @@ export default function Prescribe() {
     },
   ];
 
+  // Add medicine handler
+  const addMedicine = () => {
+    setMedicines((prev) => [
+      ...prev,
+      { name: "", nums: ["", "", ""], numberOfDays: "", comment: "" },
+    ]);
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -264,29 +276,10 @@ export default function Prescribe() {
           newNums[numIdx] = value;
           return { ...med, nums: newNums };
         }
+        if (field === "numberOfDays") return { ...med, numberOfDays: value };
         return med;
       })
     );
-  };
-
-  const addMedicine = () => {
-    setMedicines((prev) => {
-      const newMedicines = [
-        ...prev,
-        { name: "", nums: ["", "", ""], comment: "" },
-      ];
-      // Initialize autocomplete state for the new medicine
-      const newIdx = newMedicines.length - 1;
-      setAutocompleteStates((prevState) => ({
-        ...prevState,
-        [newIdx]: {
-          suggestions: medicineCommentsData.commonComments.slice(0, 5),
-          showSuggestions: false,
-          selectedIndex: -1,
-        },
-      }));
-      return newMedicines;
-    });
   };
 
   const removeMedicine = () => {
@@ -871,7 +864,10 @@ export default function Prescribe() {
       onExamination: form.oe,
       investigations: form.invs,
       advice: form.adv,
-      medicines: validMedicines, // Use the validated medicines
+      medicines: validMedicines.map((med) => ({
+        ...med,
+        numberOfDays: med.numberOfDays ? parseInt(med.numberOfDays) : 1,
+      })),
     };
 
     // Debug logging - log the data being sent
@@ -1345,6 +1341,23 @@ export default function Prescribe() {
                         min="0"
                       />
                     </div>
+                    <span className="ml-4 text-sm font-medium text-gray-700">
+                      Days
+                    </span>
+                    <input
+                      type="number"
+                      value={med.numberOfDays}
+                      onChange={(e) =>
+                        handleMedicineChange(
+                          idx,
+                          "numberOfDays",
+                          e.target.value
+                        )
+                      }
+                      className="w-16 border border-gray-300 rounded-lg px-2 py-1 text-center focus:outline-none focus:ring-2 focus:ring-green-400"
+                      min="1"
+                      placeholder="Days"
+                    />
                     <div className="flex flex-col mb-2 relative">
                       <textarea
                         ref={(el) => {
@@ -1446,7 +1459,12 @@ export default function Prescribe() {
                       adv: "",
                     });
                     setMedicines([
-                      { name: "", nums: ["", "", ""], comment: "" },
+                      {
+                        name: "",
+                        nums: ["", "", ""],
+                        numberOfDays: "",
+                        comment: "",
+                      },
                     ]);
                     setPatientId(null);
                     setPatientError("");

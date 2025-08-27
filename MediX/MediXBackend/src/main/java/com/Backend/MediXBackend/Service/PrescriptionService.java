@@ -72,6 +72,8 @@ public class PrescriptionService {
                 newMedicine.setMorningDose(medicine.getMorningDose());
                 newMedicine.setAfternoonDose(medicine.getAfternoonDose());
                 newMedicine.setEveningDose(medicine.getEveningDose());
+
+                newMedicine.setNumberOfDays(medicine.getNumberOfDays());
                 newMedicine.setComment(medicine.getComment());
                 
                 PrescriptionMedicine savedMedicine = prescriptionMedicineRepo.save(newMedicine);
@@ -112,6 +114,10 @@ public class PrescriptionService {
                         // Add new medicines
                         for (PrescriptionMedicine medicine : updatedPrescription.getMedicines()) {
                             medicine.setPrescription(prescription);
+                            // Ensure numberOfDays is set
+                            if (medicine.getNumberOfDays() == null) {
+                                medicine.setNumberOfDays(1);
+                            }
                             prescriptionMedicineRepo.save(medicine);
                         }
                     }
