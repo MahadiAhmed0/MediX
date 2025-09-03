@@ -96,7 +96,10 @@ export default function RecordsPage() {
               <FaUserCircle className="text-green-500 text-3xl" /> User Records
             </h1>
             <div className="flex items-center gap-2">
-              <label htmlFor="role" className="text-sm text-gray-700 font-semibold">
+              <label
+                htmlFor="role"
+                className="text-sm text-gray-700 font-semibold"
+              >
                 Filter by Role
               </label>
               <select
@@ -115,34 +118,55 @@ export default function RecordsPage() {
 
           {/* Loading/Error State */}
           {loading ? (
-            <div className="text-center py-16 text-lg text-gray-500 animate-pulse">Loading users...</div>
+            <div className="text-center py-16 text-lg text-gray-500 animate-pulse">
+              Loading users...
+            </div>
           ) : error ? (
-            <div className="text-center py-16 text-lg text-red-500">{error}</div>
+            <div className="text-center py-16 text-lg text-red-500">
+              {error}
+            </div>
           ) : (
             <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-lg">
               <table className="min-w-full bg-white rounded-2xl">
                 <thead>
                   <tr className="bg-gradient-to-r from-green-100 to-blue-100 text-green-900">
                     <th className="p-4 text-sm font-semibold text-left">#</th>
-                    <th className="p-4 text-sm font-semibold text-left">Name</th>
-                    <th className="p-4 text-sm font-semibold text-left">Email</th>
-                    <th className="p-4 text-sm font-semibold text-left">Role</th>
-                    <th className="p-4 text-sm font-semibold text-left">Joining Year</th>
-                    <th className="p-4 text-sm font-semibold text-left">Actions</th>
+                    <th className="p-4 text-sm font-semibold text-left">
+                      Name
+                    </th>
+                    <th className="p-4 text-sm font-semibold text-left">
+                      Email
+                    </th>
+                    <th className="p-4 text-sm font-semibold text-left">
+                      Role
+                    </th>
+                    <th className="p-4 text-sm font-semibold text-left">
+                      Joining Year
+                    </th>
+                    <th className="p-4 text-sm font-semibold text-left">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-10 text-gray-400 text-lg">No users found.</td>
+                      <td
+                        colSpan={6}
+                        className="text-center py-10 text-black text-lg"
+                      >
+                        No users found.
+                      </td>
                     </tr>
                   ) : (
                     filteredUsers.map((user, idx) => (
                       <tr
                         key={user.id}
-                        className="border-b border-gray-100 hover:bg-blue-50 transition-colors group"
+                        className="border-b border-gray-100 text-black hover:bg-blue-50 transition-colors group"
                       >
-                        <td className="p-4 text-sm text-gray-500 font-mono">{idx + 1}</td>
+                        <td className="p-4 text-sm text-gray-500 font-mono">
+                          {idx + 1}
+                        </td>
                         <td className="p-4 text-sm flex items-center gap-3">
                           <span className="inline-block">
                             {user.role === "Doctor" ? (
@@ -157,18 +181,28 @@ export default function RecordsPage() {
                           </span>
                           <span>{user.name}</span>
                         </td>
-                        <td className="p-4 text-sm text-blue-900">{user.email}</td>
+                        <td className="p-4 text-sm text-blue-900">
+                          {user.email}
+                        </td>
                         <td className="p-4 text-sm">
-                          <span className={`inline-block px-2 py-1 rounded-lg text-xs font-semibold
-                            ${user.role === "Doctor" ? "bg-green-100 text-green-800" :
-                              user.role === "Receptionist" ? "bg-blue-100 text-blue-800" :
-                              user.role === "Pharmacist" ? "bg-purple-100 text-purple-800" :
-                              "bg-gray-100 text-gray-600"}`}
+                          <span
+                            className={`inline-block px-2 py-1 rounded-lg text-xs font-semibold
+                            ${
+                              user.role === "Doctor"
+                                ? "bg-green-100 text-green-800"
+                                : user.role === "Receptionist"
+                                ? "bg-blue-100 text-blue-800"
+                                : user.role === "Pharmacist"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-gray-100 text-gray-600"
+                            }`}
                           >
                             {user.role || "-"}
                           </span>
                         </td>
-                        <td className="p-4 text-sm text-gray-700">{user.joiningYear || "-"}</td>
+                        <td className="p-4 text-sm text-gray-700">
+                          {user.joiningYear || "-"}
+                        </td>
                         <td className="p-4 flex gap-2">
                           <button
                             onClick={() => handleEdit(user.id)}

@@ -2,6 +2,7 @@ package com.Backend.MediXBackend.Service;
 
 import com.Backend.MediXBackend.Model.Qualification;
 import com.Backend.MediXBackend.Repository.QualificationRepository;
+import com.Backend.MediXBackend.Repository.DoctorQualificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,9 @@ public class QualificationService {
 
     @Autowired
     private QualificationRepository qualificationRepository;
+
+    @Autowired
+    private DoctorQualificationRepository doctorQualificationRepository;
 
     // Create a new qualification
     @Transactional
@@ -58,6 +62,16 @@ public class QualificationService {
         if (!qualificationRepository.existsById(id)) {
             throw new RuntimeException("Qualification not found with id: " + id);
         }
+        
+        // Check if any doctors have this qualification
+        boolean hasReferences = doctorQualificationRepository.findAll()
+                .stream()
+                .anyMatch(dq -> dq.getId().getQualificationId().equals(id));
+        
+        if (hasReferences) {
+            throw new RuntimeException("Cannot delete qualification because it is currently assigned to one or more doctors. Please remove this qualification from all doctors first.");
+        }
+        
         qualificationRepository.deleteById(id);
     }
 

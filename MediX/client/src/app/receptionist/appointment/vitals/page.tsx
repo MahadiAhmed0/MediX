@@ -229,10 +229,10 @@ export default function VitalsPage() {
 
   const filteredAppointments = rows.filter(
     (r) =>
-      r.name.toLowerCase().includes(search.toLowerCase()) ||
-      r.phoneNumber.includes(search) ||
-      r.doctorName.toLowerCase().includes(search.toLowerCase()) ||
-      r.date.includes(search)
+      (r.name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (r.phoneNumber || "").includes(search) ||
+      (r.doctorName || "").toLowerCase().includes(search.toLowerCase()) ||
+      (r.date || "").includes(search)
   );
 
   const lowerNavBgColor = "#1F4604";

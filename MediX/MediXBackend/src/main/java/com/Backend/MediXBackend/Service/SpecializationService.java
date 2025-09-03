@@ -2,6 +2,7 @@ package com.Backend.MediXBackend.Service;
 
 import com.Backend.MediXBackend.Model.Specialization;
 import com.Backend.MediXBackend.Repository.SpecializationRepository;
+import com.Backend.MediXBackend.Repository.DoctorSpecializationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,9 @@ public class SpecializationService {
 
     @Autowired
     private SpecializationRepository specializationRepository;
+
+    @Autowired
+    private DoctorSpecializationRepository doctorSpecializationRepository;
 
     // Create a new specialization
     @Transactional
@@ -58,6 +62,16 @@ public class SpecializationService {
         if (!specializationRepository.existsById(id)) {
             throw new RuntimeException("Specialization not found with id: " + id);
         }
+        
+        // Check if any doctors have this specialization
+        boolean hasReferences = doctorSpecializationRepository.findAll()
+                .stream()
+                .anyMatch(ds -> ds.getId().getSpecializationId().equals(id));
+        
+        if (hasReferences) {
+            throw new RuntimeException("Cannot delete specialization because it is currently assigned to one or more doctors. Please remove this specialization from all doctors first.");
+        }
+        
         specializationRepository.deleteById(id);
     }
 

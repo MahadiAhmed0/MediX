@@ -16,6 +16,7 @@ interface PrescriptionData {
   medicines: {
     name: string;
     nums: string[];
+    numberOfDays?: string;
     comment?: string;
   }[];
   patientId: string;
@@ -169,6 +170,11 @@ export default function PrescriptionPreview() {
                       <div className="text-sm text-green-800 mb-1">
                         Dosage: {med.nums && med.nums.join("-")}
                       </div>
+                      {med.numberOfDays && (
+                        <div className="text-sm text-green-800 mb-1">
+                          Days: {med.numberOfDays}
+                        </div>
+                      )}
                       {med.comment && (
                         <div className="text-xs text-gray-700 italic">
                           Comment: {med.comment}

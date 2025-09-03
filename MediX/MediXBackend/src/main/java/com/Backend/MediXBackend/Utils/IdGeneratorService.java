@@ -28,7 +28,6 @@ public class IdGeneratorService {
         // Get max existing doctor ID
         Long maxId = doctorRepo.findMaxDoctorId().orElse(0L);
 
-        // Extract the serial part from the max ID (last 3 digits)
         int nextSerial = 1;
         if (maxId != 0L) {
             String maxIdStr = String.valueOf(maxId);
@@ -57,15 +56,12 @@ public class IdGeneratorService {
 
     // Add this method to IdGeneratorService.java
     public synchronized Long generateReceptionistId() {
-        // Get max existing receptionist ID in the range 2502001-2502999
         Long maxId = receptionistRepo.findMaxReceptionistId().orElse(2502000L);
 
         // If no receptionist exists yet, start with 2502001
         if (maxId < 2502001) {
             return 2502001L;
         }
-
-        // If we haven't reached the limit (2502999), increment
         if (maxId < 2502999) {
             return maxId + 1;
         }
@@ -73,7 +69,7 @@ public class IdGeneratorService {
         // If we've reached the limit, throw an exception
         throw new RuntimeException("Maximum number of receptionists (2502999) reached");
     }
-    // Add this method to your existing IdGeneratorService class
+
     public Long generatePharmacistId() {
         Optional<Long> maxId = pharmacistRepository.findMaxPharmacistId();
         Long nextId = maxId.orElse(2503000L) + 1;

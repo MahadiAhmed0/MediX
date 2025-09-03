@@ -112,6 +112,12 @@ public class QualificationController {
             qualificationService.deleteQualification(id);
             return ResponseEntity.ok(Map.of("message", "Qualification deleted successfully", "id", id));
         } catch (RuntimeException e) {
+            // Check if it's a constraint violation error
+            if (e.getMessage().contains("currently assigned to one or more doctors")) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(Map.of("error", e.getMessage()));
+            }
+            // Otherwise it's likely a not found error
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {

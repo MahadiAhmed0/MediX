@@ -33,6 +33,7 @@ export default function SignIn() {
         return;
       }
 
+      // Doctor login
       const resDoctors = await fetch("http://localhost:8080/api/doctors");
       let doctor = null;
       if (resDoctors.ok) {
@@ -47,6 +48,79 @@ export default function SignIn() {
         return;
       }
 
+      // Pharmacist/Receptionist login (ID prefix based)
+      // Try pharmacist API first
+      const resPharmacist = await fetch(
+        "http://localhost:8080/api/pharmacists/by-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email.trim(),
+            password: password.trim(),
+          }),
+        }
+      );
+      if (resPharmacist.ok) {
+        const pharmacistResponse = await resPharmacist.json();
+        if (
+          pharmacistResponse.success &&
+          pharmacistResponse.data &&
+          pharmacistResponse.data.id
+        ) {
+          const idStr = pharmacistResponse.data.id.toString();
+          if (idStr.startsWith("2503")) {
+            // Pharmacist login
+            const pharmacistData = pharmacistResponse.data;
+            localStorage.setItem("pharmacistId", pharmacistData.id.toString());
+            localStorage.setItem("pharmacistName", pharmacistData.name);
+            localStorage.setItem("pharmacistEmail", pharmacistData.email);
+            localStorage.setItem(
+              "pharmacistPhoneNumber",
+              pharmacistData.phoneNumber
+            );
+            localStorage.setItem("pharmacistPassword", pharmacistData.password);
+            localStorage.setItem("pharmacistAddress", pharmacistData.address);
+            localStorage.setItem(
+              "pharmacistData",
+              JSON.stringify(pharmacistData)
+            );
+            router.push(`/pharmacist?email=${encodeURIComponent(email)}`);
+            return;
+          } else if (idStr.startsWith("2502")) {
+            // Receptionist login (from pharmacist API)
+            const receptionistData = pharmacistResponse.data;
+            localStorage.setItem(
+              "receptionistId",
+              receptionistData.id.toString()
+            );
+            localStorage.setItem("receptionistName", receptionistData.name);
+            localStorage.setItem("receptionistEmail", receptionistData.email);
+            localStorage.setItem(
+              "receptionistPhoneNumber",
+              receptionistData.phoneNumber
+            );
+            localStorage.setItem(
+              "receptionistPassword",
+              receptionistData.password
+            );
+            localStorage.setItem(
+              "receptionistAddress",
+              receptionistData.address
+            );
+            localStorage.setItem(
+              "receptionistData",
+              JSON.stringify(receptionistData)
+            );
+            router.push(`/receptionist?email=${encodeURIComponent(email)}`);
+            return;
+          }
+        }
+      }
+
+      // Try receptionist API if not already handled
       const resReception = await fetch(
         "http://localhost:8080/api/receptionists/by-email",
         {
@@ -62,33 +136,58 @@ export default function SignIn() {
       );
       if (resReception.ok) {
         const receptionistResponse = await resReception.json();
-        if (receptionistResponse.success) {
-          // Store receptionist data in localStorage
-          const receptionistData = receptionistResponse.data;
-          localStorage.setItem(
-            "receptionistId",
-            receptionistData.id.toString()
-          );
-          localStorage.setItem("receptionistName", receptionistData.name);
-          localStorage.setItem("receptionistEmail", receptionistData.email);
-          localStorage.setItem(
-            "receptionistPhoneNumber",
-            receptionistData.phoneNumber
-          );
-          localStorage.setItem(
-            "receptionistPassword",
-            receptionistData.password
-          );
-          localStorage.setItem("receptionistAddress", receptionistData.address);
-
-          // Optionally, store the entire data object as JSON
-          localStorage.setItem(
-            "receptionistData",
-            JSON.stringify(receptionistData)
-          );
-
-          router.push(`/receptionist?email=${encodeURIComponent(email)}`);
-          return;
+        if (
+          receptionistResponse.success &&
+          receptionistResponse.data &&
+          receptionistResponse.data.id
+        ) {
+          const idStr = receptionistResponse.data.id.toString();
+          if (idStr.startsWith("2502")) {
+            // Receptionist login
+            const receptionistData = receptionistResponse.data;
+            localStorage.setItem(
+              "receptionistId",
+              receptionistData.id.toString()
+            );
+            localStorage.setItem("receptionistName", receptionistData.name);
+            localStorage.setItem("receptionistEmail", receptionistData.email);
+            localStorage.setItem(
+              "receptionistPhoneNumber",
+              receptionistData.phoneNumber
+            );
+            localStorage.setItem(
+              "receptionistPassword",
+              receptionistData.password
+            );
+            localStorage.setItem(
+              "receptionistAddress",
+              receptionistData.address
+            );
+            localStorage.setItem(
+              "receptionistData",
+              JSON.stringify(receptionistData)
+            );
+            router.push(`/receptionist?email=${encodeURIComponent(email)}`);
+            return;
+          } else if (idStr.startsWith("2503")) {
+            // Pharmacist login (from receptionist API)
+            const pharmacistData = receptionistResponse.data;
+            localStorage.setItem("pharmacistId", pharmacistData.id.toString());
+            localStorage.setItem("pharmacistName", pharmacistData.name);
+            localStorage.setItem("pharmacistEmail", pharmacistData.email);
+            localStorage.setItem(
+              "pharmacistPhoneNumber",
+              pharmacistData.phoneNumber
+            );
+            localStorage.setItem("pharmacistPassword", pharmacistData.password);
+            localStorage.setItem("pharmacistAddress", pharmacistData.address);
+            localStorage.setItem(
+              "pharmacistData",
+              JSON.stringify(pharmacistData)
+            );
+            router.push(`/pharmacist?email=${encodeURIComponent(email)}`);
+            return;
+          }
         }
       }
 
