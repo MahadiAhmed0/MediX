@@ -253,20 +253,6 @@ PUT    /api/prescriptions/{id} # Update prescription
 
 For detailed API documentation, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
 
-## 🎨 Screenshots
-
-### Dashboard Overview
-
-![Dashboard](./client/public/window.svg)
-
-### Appointment Management
-
-![Appointments](./client/public/list.png)
-
-### Prescription System
-
-![Prescriptions](./client/public/Prescription.png)
-
 ## 🧪 Development & Testing
 
 ### Running Tests
@@ -316,13 +302,13 @@ npm start
 
 ## 🤝 Contributing
 
-This is an academic project by SPL Team 5. For any questions or suggestions:
+This is an academic project for SPL course by our team:
 
 ### Team Members
 
-- **Nuren Fahmid** - ID: 220042121
-- **Ridwan Raees Khan** - ID: 220042120
-- **Mahadi Ahmed** - ID: 220042163
+- **Nuren Fahmid**
+- **Ridwan Raees Khan**
+- **Mahadi Ahmed**
 
 ### Development Workflow
 
@@ -343,23 +329,6 @@ This is an academic project by SPL Team 5. For any questions or suggestions:
 - 🤖 **AI Integration**: AI-powered diagnosis suggestions and drug interaction checks
 - 📋 **Electronic Health Records**: Complete EHR integration
 - 💳 **Payment Gateway**: Online payment processing for appointments and medications
-
-## 📋 System Requirements
-
-### Minimum Requirements
-
-- **RAM**: 4 GB
-- **Storage**: 2 GB free space
-- **Java**: JDK 17+
-- **Node.js**: v18+
-- **Browser**: Chrome 90+, Firefox 88+, Safari 14+
-
-### Recommended Requirements
-
-- **RAM**: 8 GB or higher
-- **Storage**: 5 GB free space
-- **CPU**: Multi-core processor
-- **Database**: MySQL 8.0+ or PostgreSQL 12+
 
 ## 🐛 Troubleshooting
 
