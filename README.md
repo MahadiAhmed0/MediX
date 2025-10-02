@@ -1,7 +1,7 @@
 # MediX - Comprehensive Medical Management System
 
 <div align="center">
-  <img src="./client/public/lo.png" alt="MediX Logo" width="200"/>
+  <img src="./Medix/client/public/lo.png" alt="MediX Logo" width="200"/>
   
   [![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://www.oracle.com/java/)
   [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.0-green.svg)](https://spring.io/projects/spring-boot)
