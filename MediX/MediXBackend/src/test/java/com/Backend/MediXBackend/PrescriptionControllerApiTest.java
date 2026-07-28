@@ -65,4 +65,15 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.message").value("Prescription created successfully"));
     }
+
+    @Test
+    void createPrescription_ServiceThrows_Returns500() throws Exception {
+        when(prescriptionService.createPrescription(any())).thenThrow(new RuntimeException("DB error"));
+
+        String json = mapper.writeValueAsString(Map.of("patientId", 1L, "doctorId", 2501001L));
+        mockMvc.perform(post("/api/prescriptions")
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.error").value("Failed to create prescription"));
+    }
 }

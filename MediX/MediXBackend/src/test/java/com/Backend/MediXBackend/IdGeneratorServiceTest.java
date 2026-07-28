@@ -88,4 +88,18 @@ class IdGeneratorServiceTest {
 
         assertEquals(11L, idGenService.generatePatientId());
     }
+
+    @Test
+    void generateReceptionistId_FirstReceptionist_Returns2502001() {
+        when(receptionistRepo.findMaxReceptionistId()).thenReturn(Optional.empty());
+
+        assertEquals(2502001L, idGenService.generateReceptionistId());
+    }
+
+    @Test
+    void generateReceptionistId_MaxBelow2502001_Returns2502001() {
+        when(receptionistRepo.findMaxReceptionistId()).thenReturn(Optional.of(1000L));
+
+        assertEquals(2502001L, idGenService.generateReceptionistId());
+    }
 }

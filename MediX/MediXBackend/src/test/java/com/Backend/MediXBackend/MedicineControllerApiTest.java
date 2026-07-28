@@ -83,4 +83,20 @@ class MedicineControllerApiTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.medicineName").value("Napa"));
     }
+
+    @Test
+    void updateMedicine_Success_Returns200() throws Exception {
+        Medicine updated = new Medicine();
+        updated.setId(1L);
+        updated.setMedicineName("Napa Extra");
+        when(medicineService.updateMedicine(eq(1L), any(Medicine.class))).thenReturn(updated);
+
+        String json = """
+            {"company":"Beximco","medicineName":"Napa Extra","genericName":"Para",
+             "quantity":50,"unitCost":3.0,"unitPrice":5.0,"expiryDate":"2027-01-01"}""";
+        mockMvc.perform(put("/api/medicines/1")
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.medicineName").value("Napa Extra"));
+    }
 }

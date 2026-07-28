@@ -81,4 +81,13 @@ class MedicinePatientServiceTest {
         assertEquals(3.0, result.getUnitCost());
         assertEquals(5.0, result.getUnitPrice());
     }
+
+    @Test
+    void updateMedicine_NotFound_ReturnsNull() {
+        when(medicineRepository.findById(999L)).thenReturn(Optional.empty());
+
+        Medicine result = medicineService.updateMedicine(999L, new Medicine());
+
+        assertNull(result);
+    }
 }
