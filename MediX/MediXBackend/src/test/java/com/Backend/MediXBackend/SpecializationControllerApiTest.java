@@ -28,6 +28,7 @@ class SpecializationControllerApiTest {
     @MockitoBean
     private SpecializationService specializationService;
 
+    // Verify POST /api/specializations returns 201 Created with specialization data
     @Test
     void createSpecialization_Success_Returns201() throws Exception {
         Specialization s = new Specialization();
@@ -42,6 +43,7 @@ class SpecializationControllerApiTest {
             .andExpect(jsonPath("$.name").value("Cardiology"));
     }
 
+    // Verify POST /api/specializations with empty name returns 400 Bad Request
     @Test
     void createSpecialization_EmptyName_Returns400() throws Exception {
         String json = "{\"name\":\"\"}";
@@ -50,6 +52,7 @@ class SpecializationControllerApiTest {
             .andExpect(status().isBadRequest());
     }
 
+    // Verify POST /api/specializations with duplicate name returns 409 Conflict
     @Test
     void createSpecialization_Duplicate_Returns409() throws Exception {
         when(specializationService.existsByName("Cardiology")).thenReturn(true);
@@ -61,12 +64,14 @@ class SpecializationControllerApiTest {
             .andExpect(jsonPath("$.error").value("Specialization with this name already exists"));
     }
 
+    // Verify GET /api/specializations returns 200 OK with list of specializations
     @Test
     void getAllSpecializations_Returns200() throws Exception {
         when(specializationService.getAllSpecializations()).thenReturn(List.of());
         mockMvc.perform(get("/api/specializations")).andExpect(status().isOk());
     }
 
+    // Verify GET /api/specializations/{id} returns 200 with specialization data when found
     @Test
     void getSpecializationById_Found_Returns200() throws Exception {
         Specialization s = new Specialization();
@@ -79,6 +84,7 @@ class SpecializationControllerApiTest {
             .andExpect(jsonPath("$.name").value("Cardiology"));
     }
 
+    // Verify GET /api/specializations/{id} returns 404 when specialization is not found
     @Test
     void getSpecializationById_NotFound_Returns404() throws Exception {
         when(specializationService.getSpecializationById(99)).thenReturn(Optional.empty());
@@ -87,6 +93,7 @@ class SpecializationControllerApiTest {
             .andExpect(status().isNotFound());
     }
 
+    // Verify PUT /api/specializations/{id} returns 200 with updated specialization name
     @Test
     void updateSpecialization_Success_Returns200() throws Exception {
         Specialization s = new Specialization();
@@ -100,6 +107,7 @@ class SpecializationControllerApiTest {
             .andExpect(status().isOk());
     }
 
+    // Verify DELETE /api/specializations/{id} returns 409 Conflict when specialization is assigned to doctors
     @Test
     void deleteSpecialization_Blocked_Returns409() throws Exception {
         doThrow(new RuntimeException("Cannot delete specialization because it is currently assigned to one or more doctors"))
@@ -109,6 +117,7 @@ class SpecializationControllerApiTest {
             .andExpect(status().isConflict());
     }
 
+    // Verify DELETE /api/specializations/{id} returns 200 when specialization is successfully deleted
     @Test
     void deleteSpecialization_Success_Returns200() throws Exception {
         doNothing().when(specializationService).deleteSpecialization(1);
@@ -117,6 +126,7 @@ class SpecializationControllerApiTest {
             .andExpect(status().isOk());
     }
 
+    // Verify GET /api/specializations/exists/{name} returns 200 with exists=true when specialization name is found
     @Test
     void existsByName_True_Returns200() throws Exception {
         when(specializationService.existsByName("Cardiology")).thenReturn(true);

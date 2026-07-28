@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class MediXBackendApplicationTests {
 
+	// Verify the Spring application context loads without errors
 	@Test
 	void contextLoads() {
 	}

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.*;
 
 class AuthEdgeCaseTests {
 
+    // Verify NullPointerException is thrown when stored password is null
     @Test
     void pharmacistLogin_NullPasswordInDB_NonNullInput_NPE() {
         PharmacistService svc = new PharmacistService();
@@ -30,6 +31,7 @@ class AuthEdgeCaseTests {
             svc.getPharmacistByEmailAndPassword("ph@test.com", "input"));
     }
 
+    // Verify null input password is handled gracefully without NullPointerException
     @Test
     void pharmacistLogin_NullInputPassword_DoesNotNPE() {
         PharmacistService svc = new PharmacistService();
@@ -48,6 +50,7 @@ class AuthEdgeCaseTests {
         assertFalse(result.isPresent());
     }
 
+    // Verify NullPointerException is thrown during receptionist login when stored password is null
     @Test
     void receptionistLogin_NullPasswordInDB_NonNullInput_NPE() {
         ReceptionistService svc = new ReceptionistService();
@@ -66,6 +69,7 @@ class AuthEdgeCaseTests {
             svc.getReceptionistByEmailAndPassword("r@test.com", "input"));
     }
 
+    // Verify login returns empty Optional when email is not found in the database
     @Test
     void pharmacistLogin_WrongEmail_ReturnsEmpty() {
         PharmacistService svc = new PharmacistService();

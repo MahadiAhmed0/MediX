@@ -29,6 +29,7 @@ class PrescriptionControllerApiTest {
     @MockitoBean
     private PrescriptionService prescriptionService;
 
+    // Verify POST /api/prescriptions without patientId returns 400 Bad Request
     @Test
     void createPrescription_MissingPatientId_Returns400() throws Exception {
         String json = mapper.writeValueAsString(Map.of("doctorId", 2501001L));
@@ -38,6 +39,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.error").value("Patient ID and Doctor ID are required"));
     }
 
+    // Verify POST /api/prescriptions without doctorId returns 400 Bad Request
     @Test
     void createPrescription_MissingDoctorId_Returns400() throws Exception {
         String json = mapper.writeValueAsString(Map.of("patientId", 1L));
@@ -47,6 +49,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.error").value("Patient ID and Doctor ID are required"));
     }
 
+    // Verify POST /api/prescriptions with valid data returns 200 and success message
     @Test
     void createPrescription_Success_Returns200() throws Exception {
         Prescription saved = new Prescription();
@@ -67,6 +70,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.message").value("Prescription created successfully"));
     }
 
+    // Verify POST /api/prescriptions returns 500 Internal Server Error when service layer throws an exception
     @Test
     void createPrescription_ServiceThrows_Returns500() throws Exception {
         when(prescriptionService.createPrescription(any())).thenThrow(new RuntimeException("DB error"));
@@ -78,6 +82,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.error").value("Failed to create prescription"));
     }
 
+    // Verify POST /api/prescriptions/from-frontend without patientId returns 400 Bad Request
     @Test
     void createFromFrontend_MissingPatientId_Returns400() throws Exception {
         String json = "{\"doctorId\":2501001,\"chiefComplaint\":\"test\"}";
@@ -86,6 +91,7 @@ class PrescriptionControllerApiTest {
             .andExpect(status().isBadRequest());
     }
 
+    // Verify POST /api/prescriptions/from-frontend with medicines array creates prescription successfully
     @Test
     void createFromFrontend_WithMedicines_Succeeds() throws Exception {
         Prescription saved = new Prescription();
@@ -105,6 +111,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.success").value(true));
     }
 
+    // Verify GET /api/prescriptions/{id} returns 200 with prescription data when found
     @Test
     void getPrescriptionById_Found_Returns200() throws Exception {
         Prescription p = new Prescription();
@@ -119,6 +126,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.data.id").value(1));
     }
 
+    // Verify GET /api/prescriptions/{id} returns 404 when prescription is not found
     @Test
     void getPrescriptionById_NotFound_Returns404() throws Exception {
         when(prescriptionService.getPrescriptionById(999L)).thenReturn(Optional.empty());
@@ -128,6 +136,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.error").value("Prescription not found"));
     }
 
+    // Verify GET /api/prescriptions/patient/{patientId} returns 200 with patient's prescriptions
     @Test
     void getByPatientId_ReturnsPrescriptions() throws Exception {
         when(prescriptionService.getPrescriptionsByPatientId(1L)).thenReturn(List.of());
@@ -137,6 +146,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.success").value(true));
     }
 
+    // Verify GET /api/prescriptions/doctor/{doctorId} returns 200 with doctor's prescriptions
     @Test
     void getByDoctorId_ReturnsPrescriptions() throws Exception {
         when(prescriptionService.getPrescriptionsByDoctorId(2501001L)).thenReturn(List.of());
@@ -146,6 +156,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.success").value(true));
     }
 
+    // Verify GET /api/prescriptions/doctor/{id}/with-patient-details returns 200 with enriched patient information
     @Test
     void getByDoctorIdWithPatientDetails_ReturnsEnriched() throws Exception {
         when(prescriptionService.getPrescriptionsByDoctorIdWithPatientDetails(2501001L)).thenReturn(List.of());
@@ -155,6 +166,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.success").value(true));
     }
 
+    // Verify PUT /api/prescriptions/{id}/link-appointment/{appointmentId} returns 200 with updated prescription
     @Test
     void linkToAppointment_Success_Returns200() throws Exception {
         Prescription p = new Prescription();
@@ -167,6 +179,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.data.appointmentId").value(100));
     }
 
+    // Verify PUT /api/prescriptions/{id}/link-appointment/{appointmentId} returns 404 when prescription not found
     @Test
     void linkToAppointment_NotFound_Returns404() throws Exception {
         when(prescriptionService.linkPrescriptionToAppointment(999L, 100L))
@@ -177,6 +190,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.error").value("Prescription or appointment not found"));
     }
 
+    // Verify PUT /api/prescriptions/{id}/unlink-appointment removes the appointment reference and returns 200
     @Test
     void unlinkFromAppointment_Success_Returns200() throws Exception {
         Prescription p = new Prescription();
@@ -189,6 +203,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.success").value(true));
     }
 
+    // Verify DELETE /api/prescriptions/{id} returns 200 when prescription is successfully deleted
     @Test
     void deletePrescription_Success_Returns200() throws Exception {
         doNothing().when(prescriptionService).deletePrescription(1L);
@@ -198,6 +213,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.success").value(true));
     }
 
+    // Verify DELETE /api/prescriptions/{id} returns 404 when prescription does not exist
     @Test
     void deletePrescription_NotFound_Returns404() throws Exception {
         doThrow(new RuntimeException("Prescription not found")).when(prescriptionService).deletePrescription(999L);
@@ -207,6 +223,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.error").value("Prescription not found"));
     }
 
+    // Verify GET /api/prescriptions/{id}/medicines returns 200 with the list of medicines
     @Test
     void getPrescriptionMedicines_ReturnsMedicines() throws Exception {
         when(prescriptionService.getPrescriptionMedicines(1L)).thenReturn(List.of());
@@ -216,6 +233,7 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.success").value(true));
     }
 
+    // Verify GET /api/prescriptions/appointment/{appointmentId} returns 200 with linked prescriptions
     @Test
     void getByAppointmentId_ReturnsPrescriptions() throws Exception {
         when(prescriptionService.getPrescriptionsByAppointmentId(1L)).thenReturn(List.of());

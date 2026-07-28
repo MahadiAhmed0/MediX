@@ -29,12 +29,14 @@ class MedicineControllerApiTest {
     @MockitoBean
     private MedicineService medicineService;
 
+    // Verify GET /api/medicines returns 200 OK when service returns an empty list
     @Test
     void getAllMedicines_Returns200() throws Exception {
         when(medicineService.getAllMedicines()).thenReturn(List.of());
         mockMvc.perform(get("/api/medicines")).andExpect(status().isOk());
     }
 
+    // Verify GET /api/medicines/{id} returns 200 with medicine data when ID exists
     @Test
     void getMedicineById_Found_Returns200() throws Exception {
         Medicine med = new Medicine();
@@ -47,12 +49,14 @@ class MedicineControllerApiTest {
             .andExpect(jsonPath("$.medicineName").value("Napa"));
     }
 
+    // Verify GET /api/medicines/{id} returns 404 when medicine does not exist
     @Test
     void getMedicineById_NotFound_Returns404() throws Exception {
         when(medicineService.getMedicineById(999L)).thenReturn(Optional.empty());
         mockMvc.perform(get("/api/medicines/999")).andExpect(status().isNotFound());
     }
 
+    // Verify GET /api/medicines/name/{name} returns 200 when medicine name is found
     @Test
     void getMedicineByName_Found_Returns200() throws Exception {
         Medicine med = new Medicine();
@@ -64,12 +68,14 @@ class MedicineControllerApiTest {
             .andExpect(status().isOk());
     }
 
+    // Verify GET /api/medicines/name/{name} returns 404 when medicine name is not found
     @Test
     void getMedicineByName_NotFound_Returns404() throws Exception {
         when(medicineService.getMedicineByName("Unknown")).thenReturn(Optional.empty());
         mockMvc.perform(get("/api/medicines/name/Unknown")).andExpect(status().isNotFound());
     }
 
+    // Verify POST /api/medicines returns 200 with created medicine details
     @Test
     void createMedicine_Success_Returns200() throws Exception {
         Medicine med = new Medicine("Square", "Napa", "Paracetamol", 100, 5.0, 6.0, LocalDate.now().plusYears(1));
@@ -84,6 +90,7 @@ class MedicineControllerApiTest {
             .andExpect(jsonPath("$.medicineName").value("Napa"));
     }
 
+    // Verify PUT /api/medicines/{id} returns 200 with updated medicine details
     @Test
     void updateMedicine_Success_Returns200() throws Exception {
         Medicine updated = new Medicine();
@@ -100,6 +107,7 @@ class MedicineControllerApiTest {
             .andExpect(jsonPath("$.medicineName").value("Napa Extra"));
     }
 
+    // Verify PUT /api/medicines/{id} returns 404 when updating a non-existent medicine
     @Test
     void updateMedicine_NotFound_Returns404() throws Exception {
         when(medicineService.updateMedicine(eq(999L), any(Medicine.class))).thenReturn(null);
@@ -112,30 +120,35 @@ class MedicineControllerApiTest {
             .andExpect(status().isNotFound());
     }
 
+    // Verify DELETE /api/medicines/{id} returns 200 when medicine is successfully deleted
     @Test
     void deleteMedicine_Success_Returns200() throws Exception {
         when(medicineService.deleteMedicine(1L)).thenReturn(true);
         mockMvc.perform(delete("/api/medicines/1")).andExpect(status().isOk());
     }
 
+    // Verify DELETE /api/medicines/{id} returns 404 when medicine does not exist
     @Test
     void deleteMedicine_NotFound_Returns404() throws Exception {
         when(medicineService.deleteMedicine(999L)).thenReturn(false);
         mockMvc.perform(delete("/api/medicines/999")).andExpect(status().isNotFound());
     }
 
+    // Verify GET /api/medicines/company/{company} returns 200 with medicines filtered by company
     @Test
     void getMedicinesByCompany_Returns200() throws Exception {
         when(medicineService.getMedicinesByCompany("Square")).thenReturn(List.of());
         mockMvc.perform(get("/api/medicines/company/Square")).andExpect(status().isOk());
     }
 
+    // Verify GET /api/medicines/generic/{genericName} returns 200 with medicines filtered by generic name
     @Test
     void getMedicinesByGenericName_Returns200() throws Exception {
         when(medicineService.getMedicinesByGenericName("Paracetamol")).thenReturn(List.of());
         mockMvc.perform(get("/api/medicines/generic/Paracetamol")).andExpect(status().isOk());
     }
 
+    // Verify GET /api/medicines/expired returns 200 with the list of expired medicines
     @Test
     void getExpiredMedicines_Returns200() throws Exception {
         when(medicineService.getExpiredMedicines()).thenReturn(List.of());

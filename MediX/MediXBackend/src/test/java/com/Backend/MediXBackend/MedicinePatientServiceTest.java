@@ -42,6 +42,7 @@ class MedicinePatientServiceTest {
 
     // ========== MEDICINE TESTS ==========
 
+    // Verify medicine creation delegates to repository save and returns the entity with correct fields
     @Test
     void createMedicine_SetsIdViaAutoIncrement() {
         Medicine med = new Medicine();
@@ -58,6 +59,7 @@ class MedicinePatientServiceTest {
         assertEquals("Napa", result.getMedicineName());
     }
 
+    // Verify medicine update overwrites all mutable fields of an existing medicine
     @Test
     void updateMedicine_OverwritesAllFields() {
         Medicine existing = new Medicine();
@@ -88,6 +90,7 @@ class MedicinePatientServiceTest {
         assertEquals(5.0, result.getUnitPrice());
     }
 
+    // Verify attempting to update a non-existent medicine returns null
     @Test
     void updateMedicine_NotFound_ReturnsNull() {
         when(medicineRepository.findById(999L)).thenReturn(Optional.empty());
@@ -97,6 +100,7 @@ class MedicinePatientServiceTest {
         assertNull(result);
     }
 
+    // Verify deleting an existing medicine returns true and calls deleteById on the repository
     @Test
     void deleteMedicine_Existing_ReturnsTrue() {
         when(medicineRepository.existsById(1L)).thenReturn(true);
@@ -104,6 +108,7 @@ class MedicinePatientServiceTest {
         verify(medicineRepository).deleteById(1L);
     }
 
+    // Verify attempting to delete a non-existent medicine returns false and never calls deleteById
     @Test
     void deleteMedicine_NotFound_ReturnsFalse() {
         when(medicineRepository.existsById(999L)).thenReturn(false);
@@ -111,6 +116,7 @@ class MedicinePatientServiceTest {
         verify(medicineRepository, never()).deleteById(anyLong());
     }
 
+    // Verify expired medicines with expiry date before today are returned
     @Test
     void getExpiredMedicines_FindsPastExpiry() {
         Medicine expired = new Medicine();
@@ -126,6 +132,7 @@ class MedicinePatientServiceTest {
         assertTrue(result.get(0).getExpiryDate().isBefore(LocalDate.now()));
     }
 
+    // Verify medicines expiring today are excluded from the expired list
     @Test
     void getExpiredMedicines_ExcludesToday() {
         when(medicineRepository.findByExpiryDateBefore(LocalDate.now()))
@@ -137,6 +144,7 @@ class MedicinePatientServiceTest {
 
     // ========== PATIENT TESTS ==========
 
+    // Verify basic patient creation generates an ID and sets only name and phone, leaving demographics null
     @Test
     void createBasicPatient_GeneratesIdAndSetsNamePhoneOnly() {
         when(idGenService.generatePatientId()).thenReturn(100L);
@@ -153,6 +161,7 @@ class MedicinePatientServiceTest {
         assertNull(result.getBloodPressure());
     }
 
+    // Verify partial patient update only overwrites non-null fields, preserving existing values
     @Test
     void updatePatientDetails_PartialUpdate_OnlyUpdatesNonNull() {
         Patient existing = new Patient();
@@ -179,6 +188,7 @@ class MedicinePatientServiceTest {
         assertEquals("John", result.getName());  // not in update method so preserved
     }
 
+    // Verify updating a non-existent patient throws a RuntimeException
     @Test
     void updatePatientDetails_NotFound_ThrowsException() {
         when(patientRepo.findById(999L)).thenReturn(Optional.empty());
@@ -187,6 +197,7 @@ class MedicinePatientServiceTest {
             () -> patientService.updatePatientDetails(999L, new Patient()));
     }
 
+    // Verify that if all update fields are null, existing patient data is preserved unchanged
     @Test
     void updatePatientDetails_AllNullUpdates_PreservesAllData() {
         Patient existing = new Patient();
@@ -206,6 +217,7 @@ class MedicinePatientServiceTest {
         assertEquals("110/70", result.getBloodPressure());
     }
 
+    // Verify patient lookup by phone number returns the correct patient when found
     @Test
     void getPatientByPhoneNumber_MultiplePatientsWithSamePhone_ReturnsFirst() {
         Patient p1 = new Patient();
