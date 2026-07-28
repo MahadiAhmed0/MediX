@@ -135,4 +135,10 @@ class MedicineControllerApiTest {
         when(medicineService.getMedicinesByGenericName("Paracetamol")).thenReturn(List.of());
         mockMvc.perform(get("/api/medicines/generic/Paracetamol")).andExpect(status().isOk());
     }
+
+    @Test
+    void getExpiredMedicines_Returns200() throws Exception {
+        when(medicineService.getExpiredMedicines()).thenReturn(List.of());
+        mockMvc.perform(get("/api/medicines/expired")).andExpect(status().isOk());
+    }
 }

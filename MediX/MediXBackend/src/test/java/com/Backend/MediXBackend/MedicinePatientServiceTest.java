@@ -144,4 +144,30 @@ class MedicinePatientServiceTest {
         assertNull(result.getWeight());
         assertNull(result.getBloodPressure());
     }
+
+    @Test
+    void updatePatientDetails_PartialUpdate_OnlyUpdatesNonNull() {
+        Patient existing = new Patient();
+        existing.setId(1L);
+        existing.setName("John");
+        existing.setAge(30);
+        existing.setGender("Male");
+        existing.setWeight(70.0);
+        existing.setBloodPressure("120/80");
+
+        Patient updates = new Patient();
+        updates.setAge(35);
+        updates.setWeight(75.0);
+
+        when(patientRepo.findById(1L)).thenReturn(Optional.of(existing));
+        when(patientRepo.save(any(Patient.class))).thenReturn(existing);
+
+        Patient result = patientService.updatePatientDetails(1L, updates);
+
+        assertEquals(35, result.getAge());
+        assertEquals(75.0, result.getWeight());
+        assertEquals("Male", result.getGender());
+        assertEquals("120/80", result.getBloodPressure());
+        assertEquals("John", result.getName());
+    }
 }

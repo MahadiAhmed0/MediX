@@ -141,4 +141,15 @@ class IdGeneratorServiceTest {
             () -> idGenService.generatePharmacistId(),
             "Maximum pharmacist limit reached");
     }
+
+    @Test
+    void generateDoctorUserId_HandlesMaxIdWithLessThan7Digits() {
+        when(doctorRepo.findMaxDoctorId()).thenReturn(Optional.of(123L));
+
+        Long id = idGenService.generateDoctorUserId(1);
+
+        int year = java.time.Year.now().getValue() % 100;
+        String expected = String.format("%02d01001", year);
+        assertEquals(Long.parseLong(expected), id);
+    }
 }

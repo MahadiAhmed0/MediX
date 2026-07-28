@@ -126,4 +126,22 @@ class PrescriptionControllerApiTest {
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.error").value("Prescription not found"));
     }
+
+    @Test
+    void getByPatientId_ReturnsPrescriptions() throws Exception {
+        when(prescriptionService.getPrescriptionsByPatientId(1L)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/prescriptions/patient/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    void getByDoctorId_ReturnsPrescriptions() throws Exception {
+        when(prescriptionService.getPrescriptionsByDoctorId(2501001L)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/prescriptions/doctor/2501001"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true));
+    }
 }

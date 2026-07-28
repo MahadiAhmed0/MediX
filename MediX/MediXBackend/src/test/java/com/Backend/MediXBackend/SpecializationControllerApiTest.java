@@ -41,4 +41,23 @@ class SpecializationControllerApiTest {
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.name").value("Cardiology"));
     }
+
+    @Test
+    void createSpecialization_EmptyName_Returns400() throws Exception {
+        String json = "{\"name\":\"\"}";
+        mockMvc.perform(post("/api/specializations")
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createSpecialization_Duplicate_Returns409() throws Exception {
+        when(specializationService.existsByName("Cardiology")).thenReturn(true);
+
+        String json = "{\"name\":\"Cardiology\"}";
+        mockMvc.perform(post("/api/specializations")
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.error").value("Specialization with this name already exists"));
+    }
 }
