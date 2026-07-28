@@ -170,4 +170,31 @@ class MedicinePatientServiceTest {
         assertEquals("120/80", result.getBloodPressure());
         assertEquals("John", result.getName());
     }
+
+    @Test
+    void updatePatientDetails_NotFound_ThrowsException() {
+        when(patientRepo.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class,
+            () -> patientService.updatePatientDetails(999L, new Patient()));
+    }
+
+    @Test
+    void updatePatientDetails_AllNullUpdates_PreservesAllData() {
+        Patient existing = new Patient();
+        existing.setId(1L);
+        existing.setName("John");
+        existing.setAge(25);
+        existing.setBloodPressure("110/70");
+
+        Patient updates = new Patient();
+
+        when(patientRepo.findById(1L)).thenReturn(Optional.of(existing));
+        when(patientRepo.save(any(Patient.class))).thenReturn(existing);
+
+        Patient result = patientService.updatePatientDetails(1L, updates);
+
+        assertEquals(25, result.getAge());
+        assertEquals("110/70", result.getBloodPressure());
+    }
 }

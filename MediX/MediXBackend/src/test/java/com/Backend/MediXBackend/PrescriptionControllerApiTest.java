@@ -144,4 +144,25 @@ class PrescriptionControllerApiTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));
     }
+
+    @Test
+    void getByDoctorIdWithPatientDetails_ReturnsEnriched() throws Exception {
+        when(prescriptionService.getPrescriptionsByDoctorIdWithPatientDetails(2501001L)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/prescriptions/doctor/2501001/with-patient-details"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    void linkToAppointment_Success_Returns200() throws Exception {
+        Prescription p = new Prescription();
+        p.setId(1L);
+        p.setAppointmentId(100L);
+        when(prescriptionService.linkPrescriptionToAppointment(1L, 100L)).thenReturn(p);
+
+        mockMvc.perform(put("/api/prescriptions/1/link-appointment/100"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.appointmentId").value(100));
+    }
 }

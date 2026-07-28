@@ -60,4 +60,22 @@ class SpecializationControllerApiTest {
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.error").value("Specialization with this name already exists"));
     }
+
+    @Test
+    void getAllSpecializations_Returns200() throws Exception {
+        when(specializationService.getAllSpecializations()).thenReturn(List.of());
+        mockMvc.perform(get("/api/specializations")).andExpect(status().isOk());
+    }
+
+    @Test
+    void getSpecializationById_Found_Returns200() throws Exception {
+        Specialization s = new Specialization();
+        s.setId(1);
+        s.setName("Cardiology");
+        when(specializationService.getSpecializationById(1)).thenReturn(Optional.of(s));
+
+        mockMvc.perform(get("/api/specializations/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("Cardiology"));
+    }
 }
