@@ -117,4 +117,13 @@ class PrescriptionControllerApiTest {
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.data.id").value(1));
     }
+
+    @Test
+    void getPrescriptionById_NotFound_Returns404() throws Exception {
+        when(prescriptionService.getPrescriptionById(999L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/prescriptions/999"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error").value("Prescription not found"));
+    }
 }

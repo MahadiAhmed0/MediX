@@ -123,4 +123,16 @@ class MedicineControllerApiTest {
         when(medicineService.deleteMedicine(999L)).thenReturn(false);
         mockMvc.perform(delete("/api/medicines/999")).andExpect(status().isNotFound());
     }
+
+    @Test
+    void getMedicinesByCompany_Returns200() throws Exception {
+        when(medicineService.getMedicinesByCompany("Square")).thenReturn(List.of());
+        mockMvc.perform(get("/api/medicines/company/Square")).andExpect(status().isOk());
+    }
+
+    @Test
+    void getMedicinesByGenericName_Returns200() throws Exception {
+        when(medicineService.getMedicinesByGenericName("Paracetamol")).thenReturn(List.of());
+        mockMvc.perform(get("/api/medicines/generic/Paracetamol")).andExpect(status().isOk());
+    }
 }

@@ -128,4 +128,20 @@ class MedicinePatientServiceTest {
         List<Medicine> result = medicineService.getExpiredMedicines();
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    void createBasicPatient_GeneratesIdAndSetsNamePhoneOnly() {
+        when(idGenService.generatePatientId()).thenReturn(100L);
+        when(patientRepo.save(any(Patient.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Patient result = patientService.createBasicPatient("John", "+8801711111111");
+
+        assertEquals(100L, result.getId());
+        assertEquals("John", result.getName());
+        assertEquals("+8801711111111", result.getPhoneNumber());
+        assertNull(result.getAge());
+        assertNull(result.getGender());
+        assertNull(result.getWeight());
+        assertNull(result.getBloodPressure());
+    }
 }

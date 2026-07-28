@@ -132,4 +132,13 @@ class IdGeneratorServiceTest {
 
         assertEquals(2503011L, idGenService.generatePharmacistId());
     }
+
+    @Test
+    void generatePharmacistId_AtMaxBoundary_ThrowsException() {
+        when(pharmacistRepository.findMaxPharmacistId()).thenReturn(Optional.of(2503999L));
+
+        assertThrows(RuntimeException.class,
+            () -> idGenService.generatePharmacistId(),
+            "Maximum pharmacist limit reached");
+    }
 }
