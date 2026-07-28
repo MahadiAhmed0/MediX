@@ -36,6 +36,10 @@ class MedicinePatientServiceTest {
     @InjectMocks
     private PatientService patientService;
 
+    @BeforeEach
+    void setUp() {
+    }
+
     @Test
     void createMedicine_SetsIdViaAutoIncrement() {
         Medicine med = new Medicine();
