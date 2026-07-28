@@ -108,4 +108,21 @@ class SpecializationControllerApiTest {
         mockMvc.perform(delete("/api/specializations/1"))
             .andExpect(status().isConflict());
     }
+
+    @Test
+    void deleteSpecialization_Success_Returns200() throws Exception {
+        doNothing().when(specializationService).deleteSpecialization(1);
+
+        mockMvc.perform(delete("/api/specializations/1"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void existsByName_True_Returns200() throws Exception {
+        when(specializationService.existsByName("Cardiology")).thenReturn(true);
+
+        mockMvc.perform(get("/api/specializations/exists/Cardiology"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.exists").value(true));
+    }
 }

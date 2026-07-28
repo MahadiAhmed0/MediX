@@ -187,4 +187,22 @@ class PrescriptionControllerApiTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));
     }
+
+    @Test
+    void deletePrescription_Success_Returns200() throws Exception {
+        doNothing().when(prescriptionService).deletePrescription(1L);
+
+        mockMvc.perform(delete("/api/prescriptions/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    void deletePrescription_NotFound_Returns404() throws Exception {
+        doThrow(new RuntimeException("Prescription not found")).when(prescriptionService).deletePrescription(999L);
+
+        mockMvc.perform(delete("/api/prescriptions/999"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error").value("Prescription not found"));
+    }
 }
