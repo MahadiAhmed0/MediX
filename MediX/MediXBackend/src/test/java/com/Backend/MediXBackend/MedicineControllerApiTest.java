@@ -111,4 +111,16 @@ class MedicineControllerApiTest {
                 .contentType(MediaType.APPLICATION_JSON).content(json))
             .andExpect(status().isNotFound());
     }
+
+    @Test
+    void deleteMedicine_Success_Returns200() throws Exception {
+        when(medicineService.deleteMedicine(1L)).thenReturn(true);
+        mockMvc.perform(delete("/api/medicines/1")).andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteMedicine_NotFound_Returns404() throws Exception {
+        when(medicineService.deleteMedicine(999L)).thenReturn(false);
+        mockMvc.perform(delete("/api/medicines/999")).andExpect(status().isNotFound());
+    }
 }

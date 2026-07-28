@@ -118,4 +118,18 @@ class IdGeneratorServiceTest {
             () -> idGenService.generateReceptionistId(),
             "Maximum number of receptionists (2502999) reached");
     }
+
+    @Test
+    void generatePharmacistId_FirstPharmacist_Returns2503001() {
+        when(pharmacistRepository.findMaxPharmacistId()).thenReturn(Optional.empty());
+
+        assertEquals(2503001L, idGenService.generatePharmacistId());
+    }
+
+    @Test
+    void generatePharmacistId_IncrementsWithinRange() {
+        when(pharmacistRepository.findMaxPharmacistId()).thenReturn(Optional.of(2503010L));
+
+        assertEquals(2503011L, idGenService.generatePharmacistId());
+    }
 }

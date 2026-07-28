@@ -104,4 +104,28 @@ class MedicinePatientServiceTest {
         assertFalse(medicineService.deleteMedicine(999L));
         verify(medicineRepository, never()).deleteById(anyLong());
     }
+
+    @Test
+    void getExpiredMedicines_FindsPastExpiry() {
+        Medicine expired = new Medicine();
+        expired.setId(1L);
+        expired.setExpiryDate(LocalDate.now().minusDays(1));
+
+        when(medicineRepository.findByExpiryDateBefore(any(LocalDate.class)))
+            .thenReturn(List.of(expired));
+
+        List<Medicine> result = medicineService.getExpiredMedicines();
+
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).getExpiryDate().isBefore(LocalDate.now()));
+    }
+
+    @Test
+    void getExpiredMedicines_ExcludesToday() {
+        when(medicineRepository.findByExpiryDateBefore(LocalDate.now()))
+            .thenReturn(new ArrayList<>());
+
+        List<Medicine> result = medicineService.getExpiredMedicines();
+        assertTrue(result.isEmpty());
+    }
 }

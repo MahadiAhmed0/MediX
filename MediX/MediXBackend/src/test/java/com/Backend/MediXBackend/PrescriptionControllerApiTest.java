@@ -84,4 +84,37 @@ class PrescriptionControllerApiTest {
                 .contentType(MediaType.APPLICATION_JSON).content(json))
             .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void createFromFrontend_WithMedicines_Succeeds() throws Exception {
+        Prescription saved = new Prescription();
+        saved.setId(1L);
+        when(prescriptionService.createPrescription(any())).thenReturn(saved);
+
+        String json = """
+            {
+                "patientId": 1,
+                "doctorId": 2501001,
+                "chiefComplaint": "Fever",
+                "medicines": [{"name":"Napa","nums":["1","0","1"],"numberOfDays":5}]
+            }""";
+        mockMvc.perform(post("/api/prescriptions/from-frontend")
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    void getPrescriptionById_Found_Returns200() throws Exception {
+        Prescription p = new Prescription();
+        p.setId(1L);
+        p.setPatientId(1L);
+        p.setDoctorId(2501001L);
+        when(prescriptionService.getPrescriptionById(1L)).thenReturn(Optional.of(p));
+
+        mockMvc.perform(get("/api/prescriptions/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data.id").value(1));
+    }
 }
