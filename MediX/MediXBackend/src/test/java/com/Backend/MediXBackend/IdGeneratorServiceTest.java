@@ -1,7 +1,6 @@
 package com.Backend.MediXBackend;
 
 import com.Backend.MediXBackend.Model.Doctor;
-import com.Backend.MediXBackend.Model.User;
 import com.Backend.MediXBackend.Repository.*;
 import com.Backend.MediXBackend.Utils.IdGeneratorService;
 import org.junit.jupiter.api.BeforeEach;
