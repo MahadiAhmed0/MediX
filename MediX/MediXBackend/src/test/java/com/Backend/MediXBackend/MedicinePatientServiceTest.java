@@ -197,4 +197,18 @@ class MedicinePatientServiceTest {
         assertEquals(25, result.getAge());
         assertEquals("110/70", result.getBloodPressure());
     }
+
+    @Test
+    void getPatientByPhoneNumber_MultiplePatientsWithSamePhone_ReturnsFirst() {
+        Patient p1 = new Patient();
+        p1.setId(1L);
+        p1.setPhoneNumber("+8801711111111");
+
+        when(patientRepo.findByPhoneNumber("+8801711111111")).thenReturn(Optional.of(p1));
+
+        Optional<Patient> result = patientService.getPatientByPhoneNumber("+8801711111111");
+
+        assertTrue(result.isPresent());
+        assertEquals(1L, result.get().getId());
+    }
 }

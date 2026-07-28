@@ -78,4 +78,34 @@ class SpecializationControllerApiTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name").value("Cardiology"));
     }
+
+    @Test
+    void getSpecializationById_NotFound_Returns404() throws Exception {
+        when(specializationService.getSpecializationById(99)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/specializations/99"))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateSpecialization_Success_Returns200() throws Exception {
+        Specialization s = new Specialization();
+        s.setId(1);
+        s.setName("Neurology");
+        when(specializationService.updateSpecialization(eq(1), any())).thenReturn(s);
+
+        String json = "{\"name\":\"Neurology\"}";
+        mockMvc.perform(put("/api/specializations/1")
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteSpecialization_Blocked_Returns409() throws Exception {
+        doThrow(new RuntimeException("Cannot delete specialization because it is currently assigned to one or more doctors"))
+            .when(specializationService).deleteSpecialization(1);
+
+        mockMvc.perform(delete("/api/specializations/1"))
+            .andExpect(status().isConflict());
+    }
 }

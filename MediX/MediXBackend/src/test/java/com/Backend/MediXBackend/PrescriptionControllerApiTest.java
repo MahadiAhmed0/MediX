@@ -165,4 +165,26 @@ class PrescriptionControllerApiTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.appointmentId").value(100));
     }
+
+    @Test
+    void linkToAppointment_NotFound_Returns404() throws Exception {
+        when(prescriptionService.linkPrescriptionToAppointment(999L, 100L))
+            .thenThrow(new RuntimeException("Prescription not found"));
+
+        mockMvc.perform(put("/api/prescriptions/999/link-appointment/100"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error").value("Prescription or appointment not found"));
+    }
+
+    @Test
+    void unlinkFromAppointment_Success_Returns200() throws Exception {
+        Prescription p = new Prescription();
+        p.setId(1L);
+        p.setAppointmentId(null);
+        when(prescriptionService.unlinkPrescriptionFromAppointment(1L)).thenReturn(p);
+
+        mockMvc.perform(put("/api/prescriptions/1/unlink-appointment"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true));
+    }
 }
