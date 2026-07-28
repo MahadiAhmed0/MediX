@@ -7,6 +7,7 @@ import com.Backend.MediXBackend.Repository.PatientRepository;
 import com.Backend.MediXBackend.Service.MedicineService;
 import com.Backend.MediXBackend.Service.PatientService;
 import com.Backend.MediXBackend.Utils.IdGeneratorService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,5 +50,35 @@ class MedicinePatientServiceTest {
         when(medicineRepository.save(med)).thenReturn(med);
         Medicine result = medicineService.createMedicine(med);
         assertEquals("Napa", result.getMedicineName());
+    }
+
+    @Test
+    void updateMedicine_OverwritesAllFields() {
+        Medicine existing = new Medicine();
+        existing.setId(1L);
+        existing.setMedicineName("Napa");
+        existing.setCompany("Square");
+        existing.setQuantity(100);
+
+        Medicine updates = new Medicine();
+        updates.setMedicineName("Napa Extra");
+        updates.setCompany("Beximco");
+        updates.setGenericName("Paracetamol Extra");
+        updates.setQuantity(50);
+        updates.setUnitCost(3.0);
+        updates.setUnitPrice(5.0);
+        updates.setExpiryDate(LocalDate.now().plusMonths(6));
+
+        when(medicineRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(medicineRepository.save(any(Medicine.class))).thenReturn(existing);
+
+        Medicine result = medicineService.updateMedicine(1L, updates);
+
+        assertEquals("Napa Extra", result.getMedicineName());
+        assertEquals("Beximco", result.getCompany());
+        assertEquals("Paracetamol Extra", result.getGenericName());
+        assertEquals(50, result.getQuantity());
+        assertEquals(3.0, result.getUnitCost());
+        assertEquals(5.0, result.getUnitPrice());
     }
 }

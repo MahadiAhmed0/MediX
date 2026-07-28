@@ -27,4 +27,18 @@ class SpecializationControllerApiTest {
     private ObjectMapper mapper;
     @MockitoBean
     private SpecializationService specializationService;
+
+    @Test
+    void createSpecialization_Success_Returns201() throws Exception {
+        Specialization s = new Specialization();
+        s.setId(1);
+        s.setName("Cardiology");
+        when(specializationService.createSpecialization(any())).thenReturn(s);
+
+        String json = "{\"name\":\"Cardiology\"}";
+        mockMvc.perform(post("/api/specializations")
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.name").value("Cardiology"));
+    }
 }

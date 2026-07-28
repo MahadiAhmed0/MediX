@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -61,5 +62,25 @@ class MedicineControllerApiTest {
 
         mockMvc.perform(get("/api/medicines/name/Napa"))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void getMedicineByName_NotFound_Returns404() throws Exception {
+        when(medicineService.getMedicineByName("Unknown")).thenReturn(Optional.empty());
+        mockMvc.perform(get("/api/medicines/name/Unknown")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createMedicine_Success_Returns200() throws Exception {
+        Medicine med = new Medicine("Square", "Napa", "Paracetamol", 100, 5.0, 6.0, LocalDate.now().plusYears(1));
+        when(medicineService.createMedicine(any(Medicine.class))).thenReturn(med);
+
+        String json = """
+            {"company":"Square","medicineName":"Napa","genericName":"Paracetamol",
+             "quantity":100,"unitCost":5.0,"unitPrice":6.0,"expiryDate":"2027-07-28"}""";
+        mockMvc.perform(post("/api/medicines")
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.medicineName").value("Napa"));
     }
 }

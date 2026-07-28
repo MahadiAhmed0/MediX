@@ -45,4 +45,24 @@ class PrescriptionControllerApiTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.error").value("Patient ID and Doctor ID are required"));
     }
+
+    @Test
+    void createPrescription_Success_Returns200() throws Exception {
+        Prescription saved = new Prescription();
+        saved.setId(1L);
+        saved.setPatientId(1L);
+        saved.setDoctorId(2501001L);
+        when(prescriptionService.createPrescription(any())).thenReturn(saved);
+
+        String json = mapper.writeValueAsString(Map.of(
+            "patientId", 1L, "doctorId", 2501001L,
+            "prescriptionDate", "2026-07-28",
+            "chiefComplaint", "Headache"
+        ));
+        mockMvc.perform(post("/api/prescriptions")
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.message").value("Prescription created successfully"));
+    }
 }

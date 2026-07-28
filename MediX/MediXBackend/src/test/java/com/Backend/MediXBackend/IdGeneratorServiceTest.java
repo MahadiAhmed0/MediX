@@ -74,4 +74,18 @@ class IdGeneratorServiceTest {
         assertEquals(7, idStr.length());
         assertTrue(idStr.contains("02"));
     }
+
+    @Test
+    void generatePatientId_FirstPatient_Returns1() {
+        when(patientRepo.findMaxPatientId()).thenReturn(Optional.empty());
+
+        assertEquals(1L, idGenService.generatePatientId());
+    }
+
+    @Test
+    void generatePatientId_IncrementsFromMax() {
+        when(patientRepo.findMaxPatientId()).thenReturn(Optional.of(10L));
+
+        assertEquals(11L, idGenService.generatePatientId());
+    }
 }

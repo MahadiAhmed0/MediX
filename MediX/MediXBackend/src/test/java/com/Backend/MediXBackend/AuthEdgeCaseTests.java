@@ -65,4 +65,17 @@ class AuthEdgeCaseTests {
         assertThrows(NullPointerException.class, () ->
             svc.getReceptionistByEmailAndPassword("r@test.com", "input"));
     }
+
+    @Test
+    void pharmacistLogin_WrongEmail_ReturnsEmpty() {
+        PharmacistService svc = new PharmacistService();
+        UserRepository userRepo = mock(UserRepository.class);
+        try {
+            var f = PharmacistService.class.getDeclaredField("userRepo");
+            f.setAccessible(true); f.set(svc, userRepo);
+        } catch (Exception e) { fail(); }
+
+        when(userRepo.findByEmail("no@one.com")).thenReturn(Optional.empty());
+        assertFalse(svc.getPharmacistByEmailAndPassword("no@one.com", "any").isPresent());
+    }
 }
