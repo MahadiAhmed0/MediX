@@ -40,6 +40,8 @@ class MedicinePatientServiceTest {
     void setUp() {
     }
 
+    // ========== MEDICINE TESTS ==========
+
     @Test
     void createMedicine_SetsIdViaAutoIncrement() {
         Medicine med = new Medicine();
@@ -133,6 +135,8 @@ class MedicinePatientServiceTest {
         assertTrue(result.isEmpty());
     }
 
+    // ========== PATIENT TESTS ==========
+
     @Test
     void createBasicPatient_GeneratesIdAndSetsNamePhoneOnly() {
         when(idGenService.generatePatientId()).thenReturn(100L);
@@ -170,9 +174,9 @@ class MedicinePatientServiceTest {
 
         assertEquals(35, result.getAge());
         assertEquals(75.0, result.getWeight());
-        assertEquals("Male", result.getGender());
-        assertEquals("120/80", result.getBloodPressure());
-        assertEquals("John", result.getName());
+        assertEquals("Male", result.getGender());  // preserved
+        assertEquals("120/80", result.getBloodPressure());  // preserved
+        assertEquals("John", result.getName());  // not in update method so preserved
     }
 
     @Test
