@@ -102,4 +102,20 @@ class IdGeneratorServiceTest {
 
         assertEquals(2502001L, idGenService.generateReceptionistId());
     }
+
+    @Test
+    void generateReceptionistId_IncrementsWithinRange() {
+        when(receptionistRepo.findMaxReceptionistId()).thenReturn(Optional.of(2502005L));
+
+        assertEquals(2502006L, idGenService.generateReceptionistId());
+    }
+
+    @Test
+    void generateReceptionistId_AtMaxBoundary_ThrowsException() {
+        when(receptionistRepo.findMaxReceptionistId()).thenReturn(Optional.of(2502999L));
+
+        assertThrows(RuntimeException.class,
+            () -> idGenService.generateReceptionistId(),
+            "Maximum number of receptionists (2502999) reached");
+    }
 }

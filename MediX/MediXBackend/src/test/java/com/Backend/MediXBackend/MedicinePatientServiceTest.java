@@ -90,4 +90,18 @@ class MedicinePatientServiceTest {
 
         assertNull(result);
     }
+
+    @Test
+    void deleteMedicine_Existing_ReturnsTrue() {
+        when(medicineRepository.existsById(1L)).thenReturn(true);
+        assertTrue(medicineService.deleteMedicine(1L));
+        verify(medicineRepository).deleteById(1L);
+    }
+
+    @Test
+    void deleteMedicine_NotFound_ReturnsFalse() {
+        when(medicineRepository.existsById(999L)).thenReturn(false);
+        assertFalse(medicineService.deleteMedicine(999L));
+        verify(medicineRepository, never()).deleteById(anyLong());
+    }
 }

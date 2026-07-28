@@ -99,4 +99,16 @@ class MedicineControllerApiTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.medicineName").value("Napa Extra"));
     }
+
+    @Test
+    void updateMedicine_NotFound_Returns404() throws Exception {
+        when(medicineService.updateMedicine(eq(999L), any(Medicine.class))).thenReturn(null);
+
+        String json = """
+            {"company":"Beximco","medicineName":"Napa","genericName":"Para",
+             "quantity":50,"unitCost":3.0,"unitPrice":5.0,"expiryDate":"2027-01-01"}""";
+        mockMvc.perform(put("/api/medicines/999")
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+            .andExpect(status().isNotFound());
+    }
 }

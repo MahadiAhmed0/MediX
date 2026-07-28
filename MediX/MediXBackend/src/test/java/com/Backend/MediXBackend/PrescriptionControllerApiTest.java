@@ -76,4 +76,12 @@ class PrescriptionControllerApiTest {
             .andExpect(status().isInternalServerError())
             .andExpect(jsonPath("$.error").value("Failed to create prescription"));
     }
+
+    @Test
+    void createFromFrontend_MissingPatientId_Returns400() throws Exception {
+        String json = "{\"doctorId\":2501001,\"chiefComplaint\":\"test\"}";
+        mockMvc.perform(post("/api/prescriptions/from-frontend")
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+            .andExpect(status().isBadRequest());
+    }
 }
