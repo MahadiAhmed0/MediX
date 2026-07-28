@@ -27,4 +27,22 @@ class PrescriptionControllerApiTest {
     private ObjectMapper mapper;
     @MockitoBean
     private PrescriptionService prescriptionService;
+
+    @Test
+    void createPrescription_MissingPatientId_Returns400() throws Exception {
+        String json = mapper.writeValueAsString(Map.of("doctorId", 2501001L));
+        mockMvc.perform(post("/api/prescriptions")
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error").value("Patient ID and Doctor ID are required"));
+    }
+
+    @Test
+    void createPrescription_MissingDoctorId_Returns400() throws Exception {
+        String json = mapper.writeValueAsString(Map.of("patientId", 1L));
+        mockMvc.perform(post("/api/prescriptions")
+                .contentType(MediaType.APPLICATION_JSON).content(json))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error").value("Patient ID and Doctor ID are required"));
+    }
 }

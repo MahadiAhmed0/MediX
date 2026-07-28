@@ -45,4 +45,21 @@ class MedicineControllerApiTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.medicineName").value("Napa"));
     }
+
+    @Test
+    void getMedicineById_NotFound_Returns404() throws Exception {
+        when(medicineService.getMedicineById(999L)).thenReturn(Optional.empty());
+        mockMvc.perform(get("/api/medicines/999")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getMedicineByName_Found_Returns200() throws Exception {
+        Medicine med = new Medicine();
+        med.setId(1L);
+        med.setMedicineName("Napa");
+        when(medicineService.getMedicineByName("Napa")).thenReturn(Optional.of(med));
+
+        mockMvc.perform(get("/api/medicines/name/Napa"))
+            .andExpect(status().isOk());
+    }
 }

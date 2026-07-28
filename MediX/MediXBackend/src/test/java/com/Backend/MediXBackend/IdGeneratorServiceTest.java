@@ -51,4 +51,27 @@ class IdGeneratorServiceTest {
         assertEquals(expectedPrefix, idStr.substring(0, 4));
         assertEquals("001", idStr.substring(4));
     }
+
+    @Test
+    void generateDoctorUserId_IncrementsSerial() {
+        int year = java.time.Year.now().getValue() % 100;
+        long existingId = Long.parseLong(String.format("%02d01005", year));
+        when(doctorRepo.findMaxDoctorId()).thenReturn(Optional.of(existingId));
+
+        Long id = idGenService.generateDoctorUserId(1);
+
+        long expected = Long.parseLong(String.format("%02d01006", year));
+        assertEquals(expected, id);
+    }
+
+    @Test
+    void generateDoctorUserId_HandlesDifferentProfessionCode() {
+        when(doctorRepo.findMaxDoctorId()).thenReturn(Optional.empty());
+
+        Long id = idGenService.generateDoctorUserId(2);
+
+        String idStr = String.valueOf(id);
+        assertEquals(7, idStr.length());
+        assertTrue(idStr.contains("02"));
+    }
 }
