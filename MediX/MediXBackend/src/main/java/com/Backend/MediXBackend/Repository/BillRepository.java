@@ -14,7 +14,7 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
     List<Bill> findByDate(LocalDate date);
     List<Bill> findByCustomerNameContainingIgnoreCase(String customerName);
     List<Bill> findByPhoneNumber(String phoneNumber);
-    @Query("SELECT COALESCE(SUM(b.total), 0) FROM Bill b WHERE DATE(b.date) = CURRENT_DATE")
+    @Query("SELECT COALESCE(SUM(b.total), 0) FROM Bill b WHERE b.date = CURRENT_DATE")
     Double getTodayRevenue();
 
     @Query("SELECT COALESCE(SUM(b.total), 0) FROM Bill b WHERE b.date >= :startOfWeek AND b.date <= :endOfWeek")

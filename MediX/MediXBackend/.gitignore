@@ -34,3 +34,6 @@ build/
 
 ### Configuration Files ###
 src/main/resources/application.properties
+
+### H2 Database Files ###
+data/
